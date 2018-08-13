@@ -21,8 +21,7 @@ function updateUI() {
 
     for (let e in engine.entities) {
         let entity = engine.entities[e];
-        // text += `${e} (${entity.incrementBy}/${entity.incrementAfter}ms): ${formatNumber(entity.count.toFixed(2))}<br>`;
-        text += `${e} (${entity.incrementBy}/${entity.incrementAfter}ms): ${engine.formatNumber(entity.count)} (${entity.count})<br>`;
+        text += `${e} (${engine.formatNumber(entity.incrementBy)}/${entity.incrementAfter}ms): ${engine.formatNumber(entity.count)} (${entity.count})<br>`;
     }
 
     statusDiv.innerHTML = text;
@@ -54,7 +53,7 @@ window.onload = function() {
     buttons.formatDictionary.addEventListener("click", (e) => { engine.setNumberFormatter("dictionary") });
     buttons.formatAbstract.addEventListener("click", (e) => { engine.setNumberFormatter("abstract") });
     buttons["Source Code"]["+"].addEventListener("click", (e) => {
-        engine.entities["Source code"].incrementBy+=100000000000000;
+        engine.entities["Source code"].incrementBy+=10;
     });
     buttons["Source Code"]["-"].addEventListener("click", (e) => {
         engine.entities["Source code"].incrementBy--;
