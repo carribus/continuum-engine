@@ -16,22 +16,13 @@ const onTick = (dt) => {
 const statusDiv = document.getElementById("content");
 let buttons = {}
 
-function formatNumber(str) {
-    if (typeof str != "string") return "Not a string";
-
-    let intVal = str.split(".")[0];
-    if (typeof intVal == "string") {
-        
-    }
-    return str;
-}
-
 function updateUI() {
     let text = "Entities:<br><br>";
 
     for (let e in engine.entities) {
         let entity = engine.entities[e];
-        text += `${e} (${entity.incrementBy}/${entity.incrementAfter}ms): ${formatNumber(entity.count.toFixed(2))}<br>`;
+        // text += `${e} (${entity.incrementBy}/${entity.incrementAfter}ms): ${formatNumber(entity.count.toFixed(2))}<br>`;
+        text += `${e} (${entity.incrementBy}/${entity.incrementAfter}ms): ${engine.formatNumber(entity.count)} (${entity.count})<br>`;
     }
 
     statusDiv.innerHTML = text;
@@ -46,6 +37,9 @@ window.onload = function() {
     engine.createEntity("Translations", 650, 0, 0.1);
 
     buttons = {
+        "formatScientific": document.getElementById("formatScientific"),
+        "formatDictionary": document.getElementById("formatDictionary"),
+        "formatAbstract": document.getElementById("formatAbstract"),
         "Source Code": {
             "+": document.getElementById("SC+"),
             "-": document.getElementById("SC-")
@@ -56,8 +50,11 @@ window.onload = function() {
         }
     };
 
+    buttons.formatScientific.addEventListener("click", (e) => { engine.setNumberFormatter("scientific") });
+    buttons.formatDictionary.addEventListener("click", (e) => { engine.setNumberFormatter("dictionary") });
+    buttons.formatAbstract.addEventListener("click", (e) => { engine.setNumberFormatter("abstract") });
     buttons["Source Code"]["+"].addEventListener("click", (e) => {
-        engine.entities["Source code"].incrementBy+=10000000000;
+        engine.entities["Source code"].incrementBy+=100000000000000;
     });
     buttons["Source Code"]["-"].addEventListener("click", (e) => {
         engine.entities["Source code"].incrementBy--;

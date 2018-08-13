@@ -1,10 +1,14 @@
 import { Entity } from "./entity.js";
+import { formatScientificNumber } from "./formatters/number_scientific.js";
+import { formatDictionaryNumber } from "./formatters/number_dictionary.js";
+import { formatAbstractNumber } from "./formatters/number_abstract.js";
 
 export class IncrementalEngine {
     constructor() {
         console.log("IncrementalEngine constructing");
         this.lastTick = 0;
         this.entities = {};
+        this.numberFormatter = formatScientificNumber
     }
 
     createEntity(key, incrementAfter, startingCount, incrementBy, maxCount) {
@@ -31,14 +35,35 @@ export class IncrementalEngine {
         for (let entName in this.entities) {
             entity = this.entities[entName]
             entity.processTick(dt);
-            // if (dt - entity.lastProcessed >= entity.incrementAfter) {
-            //     // console.log("Processing %s, %j", entName, entity);
-            //     let incrementBy = (entity.incrementBy * Math.trunc((dt-entity.lastProcessed)/entity.incrementAfter));
-            //     entity.count += incrementBy;
-            //     if (entity.count > entity.maxCount) entity.count = entity.maxCount;
-            //     entity.lastProcessed = dt;
-            // }
         }
+    }
+
+    setNumberFormatter(type) {
+        if (typeof type == "string") {
+            switch (type) {
+                case "scientific":
+                    this.numberFormatter = formatScientificNumber;
+                    break;
+
+                case "dictionary":
+                    this.numberFormatter = formatDictionaryNumber;
+                    break;
+
+                case "abstract":
+                    this.numberFormatter = formatAbstractNumber;
+
+                default:
+                    throw `Unknown number formatter (${type}) requested`;
+            }
+        } else if (typeof type == "function") {
+            this.numberFormatter = type;
+        } else {
+            throw "Unknown number type provided";
+        }
+    }
+
+    formatNumber(n) {
+        return this.numberFormatter(n);
     }
 }
 
