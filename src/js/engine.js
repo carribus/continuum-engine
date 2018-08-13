@@ -3,6 +3,12 @@ import { formatScientificNumber } from "./formatters/number_scientific.js";
 import { formatDictionaryNumber } from "./formatters/number_dictionary.js";
 import { formatAbstractNumber } from "./formatters/number_abstract.js";
 
+const NUMBER_FORMATTERS = {
+    "scientific": formatScientificNumber,
+    "dictionary": formatDictionaryNumber,
+    "abstract": formatAbstractNumber
+};
+
 export class IncrementalEngine {
     constructor() {
         console.log("IncrementalEngine constructing");
@@ -40,21 +46,8 @@ export class IncrementalEngine {
 
     setNumberFormatter(type) {
         if (typeof type == "string") {
-            switch (type) {
-                case "scientific":
-                    this.numberFormatter = formatScientificNumber;
-                    break;
-
-                case "dictionary":
-                    this.numberFormatter = formatDictionaryNumber;
-                    break;
-
-                case "abstract":
-                    this.numberFormatter = formatAbstractNumber;
-
-                default:
-                    throw `Unknown number formatter (${type}) requested`;
-            }
+            if (!NUMBER_FORMATTERS[type]) throw `Unknown number formatter (${type}) requested`;
+            this.numberFormatter = NUMBER_FORMATTERS[type];
         } else if (typeof type == "function") {
             this.numberFormatter = type;
         } else {
