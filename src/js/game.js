@@ -12,15 +12,29 @@ const onTick = (dt) => {
     window.requestAnimationFrame(onTick);
 }
 
+// DOM elements
+const statusDiv = document.getElementById("content");
+let buttons = {}
+
+function formatNumber(str) {
+    if (typeof str != "string") return "Not a string";
+
+    let intVal = str.split(".")[0];
+    if (typeof intVal == "string") {
+        
+    }
+    return str;
+}
+
 function updateUI() {
     let text = "Entities:<br><br>";
 
     for (let e in engine.entities) {
         let entity = engine.entities[e];
-        text += `${e} (${entity.incrementBy}/${entity.incrementAfter}ms): ${entity.count.toFixed(2)}<br>`;
+        text += `${e} (${entity.incrementBy}/${entity.incrementAfter}ms): ${formatNumber(entity.count.toFixed(2))}<br>`;
     }
 
-    document.body.innerHTML = text;
+    statusDiv.innerHTML = text;
 }
 
 // start the timer using animation frame
@@ -30,6 +44,37 @@ window.onload = function() {
     engine.createEntity("Sound", 150, 0, 1);
     engine.createEntity("Text", 250, 0, 1);
     engine.createEntity("Translations", 650, 0, 0.1);
+
+    buttons = {
+        "Source Code": {
+            "+": document.getElementById("SC+"),
+            "-": document.getElementById("SC-")
+        },
+        "Graphics": {
+            "+": document.getElementById("Graphics+"),
+            "-": document.getElementById("Graphics-")
+        }
+    };
+
+    buttons["Source Code"]["+"].addEventListener("click", (e) => {
+        engine.entities["Source code"].incrementBy+=10000000000;
+    });
+    buttons["Source Code"]["-"].addEventListener("click", (e) => {
+        engine.entities["Source code"].incrementBy--;
+        if ( engine.entities["Source code"].incrementBy < 0 ) {
+            engine.entities["Source code"].incrementBy = 0;
+        }
+    });
+    buttons["Graphics"]["+"].addEventListener("click", (e) => {
+        engine.entities["Graphics"].incrementBy++;
+    });
+    buttons["Graphics"]["-"].addEventListener("click", (e) => {
+        engine.entities["Graphics"].incrementBy--;
+        if ( engine.entities["Graphics"].incrementBy < 0 ) {
+            engine.entities["Graphics"].incrementBy = 0;
+        }
+    });
+
     console.log("%cIncremental Engine loaded and initialised", "color: blue");
     window.requestAnimationFrame(onTick);
 };
