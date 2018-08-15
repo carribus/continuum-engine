@@ -1,5 +1,5 @@
 export class Entity {
-    constructor(key, incrementAfter, startingCount, incrementBy, maxCount) {
+    constructor(key, incrementAfter = 0, incrementBy = 0, startingCount = 0, maxCount = Number.MAX_VALUE) {
         this.key = key;
         this.lastProcessed = 0;
         this.incrementAfter = incrementAfter;
@@ -24,8 +24,9 @@ export class Entity {
             } else {
                 let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
                 this.count += incrementBy;
-                if (this.count > this.maxCount) this.count = this.maxCount;
             }
+            // constraint check
+            if (this.count > this.maxCount) this.count = this.maxCount;
             this.lastProcessed = dt;
         }
     }

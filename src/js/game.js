@@ -17,7 +17,7 @@ const statusDiv = document.getElementById("content");
 let buttons = {}
 
 function updateUI() {
-    let text = "Entities:<br><br>";
+    let text = `<h2>Currency</h2>Gold: ${engine.currency("gold").value}<h1>Entities:</h1>`;
 
     for (let e in engine.entities) {
         let entity = engine.entities[e];
@@ -29,31 +29,42 @@ function updateUI() {
 
 // start the timer using animation frame
 window.onload = function() {
-    engine.createEntity("Source Code", 50, 0, 1).setCustomProcessor(function(dt) {
-        let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
-        this.count += incrementBy;
-        if (this.count > this.maxCount) this.count = this.maxCount;
-        console.log(this.count % 5);
-        if (this.count % 6 === 0) {
-            const bugsEntity = this.engine.entities["Bugs"];
-            bugsEntity.count += bugsEntity.incrementBy;
-        }
-    });
-    engine.createEntity("Bugs", 0, 0, 1)
-    engine.createEntity("Graphics", 75, 0, 1);
-    engine.createEntity("Sound", 150, 0, 1);
-    engine.createEntity("Text", 250, 0, 1);
-    engine.createEntity("Translations", 650, 0, 0.1).setCustomProcessor(function (dt) {
-        let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
-        this.count += incrementBy;
-        if (this.count > this.maxCount) this.count = this.maxCount;
-    });
+    createCurrencies();
+    createEntities();
+    connectUItoHandlers();
 
+    console.log("%cIncremental Engine loaded and initialised", "color: blue");
+    window.requestAnimationFrame(onTick);
+};
+
+function createCurrencies() {
+    engine.createCurrency("gold", 0);
+}
+
+function createEntities() {
+    engine.createEntity("Source Code", 1000, 1).setCustomProcessor(function(dt) {
+        let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
+        this.count += incrementBy;
+        this.engine.currency("gold").incrementBy(this.incrementBy);
+    });
+    engine.createEntity("Graphics", 0, 1);
+    engine.createEntity("Sound", 0, 1);
+    engine.createEntity("Text", 0, 1);
+    engine.createEntity("Translations", 0, 0.1)
+        .setCustomProcessor(function (dt) {
+        let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
+        this.count += incrementBy;
+        if (this.count > this.maxCount) this.count = this.maxCount;
+    });
+}
+
+function connectUItoHandlers() {
     buttons = {
         "formatScientific": document.getElementById("formatScientific"),
         "formatDictionary": document.getElementById("formatDictionary"),
         "formatAbstract": document.getElementById("formatAbstract"),
         "Source Code": {
+            "Buy1": document.getElementById("BuySCx1"),
             "+": document.getElementById("SC+"),
             "-": document.getElementById("SC-")
         },
@@ -75,11 +86,26 @@ window.onload = function() {
         }
     };
 
+    // formatter buttons
     buttons.formatScientific.addEventListener("click", (e) => { engine.setNumberFormatter("scientific") });
     buttons.formatDictionary.addEventListener("click", (e) => { engine.setNumberFormatter("dictionary") });
     buttons.formatAbstract.addEventListener("click", (e) => { engine.setNumberFormatter("abstract") });
 
+    // game and dev control buttons
     for (let key of ["Source Code", "Graphics", "Sound", "Text", "Translations"]) {
+        if (buttons[key]["Buy1"]) {
+            buttons[key]["Buy1"].addEventListener("click", (e) => {
+                const baseCost = parseFloat(e.target.dataset.basecost);
+                const cost = Math.round(parseFloat(e.target.dataset.cost));
+                const entity = e.target.dataset.entity;
+                if (engine.currency("gold").value - cost >= 0) {
+                    engine.currency("gold").incrementBy(-cost);
+                    engine.entities[entity].incrementBy += 1;
+                    e.target.dataset.cost = Math.round(baseCost * Math.pow(1.1, engine.entities[entity].incrementBy));
+                    e.target.innerHTML = `Buy 1 @ ${e.target.dataset.cost} gold`;
+                }
+            });
+        }
         buttons[key]["+"].addEventListener("click", (e) => {
             const entity = e.target.dataset.entity;
             engine.entities[entity].incrementBy += parseFloat(e.target.dataset.incrementby);
@@ -92,41 +118,4 @@ window.onload = function() {
             }
         });
     }
-/*
-    buttons["Source Code"]["+"].addEventListener("click", (e) => {
-        const entity = e.target.dataset.entity;
-        engine.entities[entity].incrementBy+=10;
-    });
-    buttons["Source Code"]["-"].addEventListener("click", (e) => {
-        const entity = e.target.dataset.entity;
-        engine.entities[entity].incrementBy--;
-        if ( engine.entities[entity].incrementBy < 0 ) {
-            engine.entities[entity].incrementBy = 0;
-        }
-    });
-    buttons["Graphics"]["+"].addEventListener("click", (e) => {
-        const entity = e.target.dataset.entity;
-        engine.entities[entity].incrementBy++;
-    });
-    buttons["Graphics"]["-"].addEventListener("click", (e) => {
-        const entity = e.target.dataset.entity;
-        engine.entities[entity].incrementBy--;
-        if ( engine.entities[entity].incrementBy < 0 ) {
-            engine.entities[entity].incrementBy = 0;
-        }
-    });
-    buttons["Sound"]["+"].addEventListener("click", (e) => {
-        const entity = e.target.dataset.entity;
-        engine.entities[entity].incrementBy++;
-    });
-    buttons["Sound"]["-"].addEventListener("click", (e) => {
-        const entity = e.target.dataset.entity;
-        engine.entities[entity].incrementBy--;
-        if ( engine.entities[entity].incrementBy < 0 ) {
-            engine.entities[entity].incrementBy = 0;
-        }
-    });
-*/
-    console.log("%cIncremental Engine loaded and initialised", "color: blue");
-    window.requestAnimationFrame(onTick);
-};
+}

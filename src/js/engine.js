@@ -2,6 +2,7 @@ import { Entity } from "./entity.js";
 import { formatScientificNumber } from "./formatters/number_scientific.js";
 import { formatDictionaryNumber } from "./formatters/number_dictionary.js";
 import { formatAbstractNumber } from "./formatters/number_abstract.js";
+import { Currency } from "./currency.js";
 
 const NUMBER_FORMATTERS = {
     "scientific": formatScientificNumber,
@@ -15,11 +16,23 @@ export class IncrementalEngine {
         this.lastTick = 0;
         this.entities = {};
         this.numberFormatter = formatDictionaryNumber;
+        this.currencies = {};
     }
 
-    createEntity(key, incrementAfter, startingCount, incrementBy, maxCount) {
+    createCurrency(type, initialValue) {
+        if (!this.currencies[type]) {
+            this.currencies[type] = new Currency(type, initialValue);
+        }
+        return this.currencies[type];
+    }
+
+    currency(type) {
+        return this.currencies[type];
+    }
+
+    createEntity(key, incrementAfter, incrementBy, startingCount, maxCount) {
         if (!this.entities[key]) {
-            this.entities[key] = new Entity(key, incrementAfter, startingCount, incrementBy, maxCount);
+            this.entities[key] = new Entity(key, incrementAfter, incrementBy, startingCount, maxCount);
             this.entities[key].engine = this;
         }
         return this.entities[key];
