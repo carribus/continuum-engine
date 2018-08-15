@@ -14,12 +14,13 @@ export class IncrementalEngine {
         console.log("IncrementalEngine constructing");
         this.lastTick = 0;
         this.entities = {};
-        this.numberFormatter = formatScientificNumber
+        this.numberFormatter = formatDictionaryNumber;
     }
 
     createEntity(key, incrementAfter, startingCount, incrementBy, maxCount) {
         if (!this.entities[key]) {
             this.entities[key] = new Entity(key, incrementAfter, startingCount, incrementBy, maxCount);
+            this.entities[key].engine = this;
         }
         return this.entities[key];
     }

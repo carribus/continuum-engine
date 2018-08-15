@@ -29,11 +29,25 @@ function updateUI() {
 
 // start the timer using animation frame
 window.onload = function() {
-    engine.createEntity("Source code", 20, 0, 1);
+    engine.createEntity("Source Code", 50, 0, 1).setCustomProcessor(function(dt) {
+        let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
+        this.count += incrementBy;
+        if (this.count > this.maxCount) this.count = this.maxCount;
+        console.log(this.count % 5);
+        if (this.count % 6 === 0) {
+            const bugsEntity = this.engine.entities["Bugs"];
+            bugsEntity.count += bugsEntity.incrementBy;
+        }
+    });
+    engine.createEntity("Bugs", 0, 0, 1)
     engine.createEntity("Graphics", 75, 0, 1);
     engine.createEntity("Sound", 150, 0, 1);
     engine.createEntity("Text", 250, 0, 1);
-    engine.createEntity("Translations", 650, 0, 0.1);
+    engine.createEntity("Translations", 650, 0, 0.1).setCustomProcessor(function (dt) {
+        let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
+        this.count += incrementBy;
+        if (this.count > this.maxCount) this.count = this.maxCount;
+    });
 
     buttons = {
         "formatScientific": document.getElementById("formatScientific"),
@@ -46,31 +60,73 @@ window.onload = function() {
         "Graphics": {
             "+": document.getElementById("Graphics+"),
             "-": document.getElementById("Graphics-")
+        },
+        "Sound": {
+            "+": document.getElementById("Sound+"),
+            "-": document.getElementById("Sound-")
+        },
+        "Text": {
+            "+": document.getElementById("Text+"),
+            "-": document.getElementById("Text-")
+        },
+        "Translations": {
+            "+": document.getElementById("Translations+"),
+            "-": document.getElementById("Translations-")
         }
     };
 
     buttons.formatScientific.addEventListener("click", (e) => { engine.setNumberFormatter("scientific") });
     buttons.formatDictionary.addEventListener("click", (e) => { engine.setNumberFormatter("dictionary") });
     buttons.formatAbstract.addEventListener("click", (e) => { engine.setNumberFormatter("abstract") });
+
+    for (let key of ["Source Code", "Graphics", "Sound", "Text", "Translations"]) {
+        buttons[key]["+"].addEventListener("click", (e) => {
+            const entity = e.target.dataset.entity;
+            engine.entities[entity].incrementBy += parseFloat(e.target.dataset.incrementby);
+        });
+        buttons[key]["-"].addEventListener("click", (e) => {
+            const entity = e.target.dataset.entity;
+            engine.entities[entity].incrementBy += parseFloat(e.target.dataset.incrementby);
+            if ( engine.entities[entity].incrementBy < 0 ) {
+                engine.entities[entity].incrementBy = 0;
+            }
+        });
+    }
+/*
     buttons["Source Code"]["+"].addEventListener("click", (e) => {
-        engine.entities["Source code"].incrementBy+=10;
+        const entity = e.target.dataset.entity;
+        engine.entities[entity].incrementBy+=10;
     });
     buttons["Source Code"]["-"].addEventListener("click", (e) => {
-        engine.entities["Source code"].incrementBy--;
-        if ( engine.entities["Source code"].incrementBy < 0 ) {
-            engine.entities["Source code"].incrementBy = 0;
+        const entity = e.target.dataset.entity;
+        engine.entities[entity].incrementBy--;
+        if ( engine.entities[entity].incrementBy < 0 ) {
+            engine.entities[entity].incrementBy = 0;
         }
     });
     buttons["Graphics"]["+"].addEventListener("click", (e) => {
-        engine.entities["Graphics"].incrementBy++;
+        const entity = e.target.dataset.entity;
+        engine.entities[entity].incrementBy++;
     });
     buttons["Graphics"]["-"].addEventListener("click", (e) => {
-        engine.entities["Graphics"].incrementBy--;
-        if ( engine.entities["Graphics"].incrementBy < 0 ) {
-            engine.entities["Graphics"].incrementBy = 0;
+        const entity = e.target.dataset.entity;
+        engine.entities[entity].incrementBy--;
+        if ( engine.entities[entity].incrementBy < 0 ) {
+            engine.entities[entity].incrementBy = 0;
         }
     });
-
+    buttons["Sound"]["+"].addEventListener("click", (e) => {
+        const entity = e.target.dataset.entity;
+        engine.entities[entity].incrementBy++;
+    });
+    buttons["Sound"]["-"].addEventListener("click", (e) => {
+        const entity = e.target.dataset.entity;
+        engine.entities[entity].incrementBy--;
+        if ( engine.entities[entity].incrementBy < 0 ) {
+            engine.entities[entity].incrementBy = 0;
+        }
+    });
+*/
     console.log("%cIncremental Engine loaded and initialised", "color: blue");
     window.requestAnimationFrame(onTick);
 };
