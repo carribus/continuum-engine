@@ -16,11 +16,13 @@ export class IncrementalEngine {
     constructor() {
         console.log("IncrementalEngine constructing");
         this.lastTick = 0;
+        this.lastSave = 0;
         this.currencies = {};
         this.producers = {};
         this.resources = {};
         this.entities = {};
         this.numberFormatter = formatDictionaryNumber;
+        this.autosavePeriod = 0;
     }
 
     createCurrency(type, initialValue) {
@@ -74,6 +76,75 @@ export class IncrementalEngine {
             }
         } else {
             this.lastTick = dt;
+        }
+        this.autoSave(dt);
+    }
+
+    autoSave(dt) {
+        if (!this.autosavePeriod) return;
+
+        const serialiseObject = (o) => {
+            const result = {};
+            for (const prop in o) {
+                result[prop] = o[prop].serialise();
+            }
+            return result;
+        }
+
+        if (this.lastSave) {
+            if (dt - this.lastSave > this.autosavePeriod) {
+                console.log('Auto-save...');
+                const state = {
+                    lastTick: 0, //this.lastTick,
+                    lastSave: 0, //this.lastSave,
+                    currencies: serialiseObject(this.currencies),
+                    producers: serialiseObject(this.producers),
+                    resources: serialiseObject(this.resources),
+                    numberFormatter: this.numberFormatter,
+                    autosavePeriod: this.autosavePeriod
+                }
+                window.localStorage.setItem('state', JSON.stringify(state));
+                this.lastSave = dt;
+            }
+        } else {
+            this.lastSave = dt;
+        }
+    }
+
+    loadState() {
+        let state = window.localStorage.getItem('state');
+
+        if (state) {
+            try {
+                state = JSON.parse(state);
+                for (const prop in state) {
+                    switch (prop) {
+                        case "currencies":
+                            for (const curr in state[prop]) {
+                                this.currencies[curr].deserialise(state[prop][curr]);
+                            }
+                            break;
+
+                        case "resources":
+                            for (const res in state[prop]) {
+                                this.resources[res].deserialise(state[prop][res]);
+                            }
+                            break;
+
+                        case "producers":
+                            for (const prod in state[prop]) {
+                                this.producers[prod].deserialise(state[prop][prod]);
+                            }
+                            break;
+
+                        default:
+                            this[prop] = state[prop];
+                            break;
+                    }
+                }
+            } catch (e) {
+                throw e;
+            }
         }
     }
 

@@ -12,6 +12,39 @@ export class Producer {
         this.engine = opts.engine;
     }
 
+    serialise() {
+        const sanitizeOutputs = (op) => {
+            const result = {};
+            for (const cat in this.outputs) {
+                result[cat] = {};
+                for (const o in this.outputs[cat]) {
+                    result[cat][o] = {...this.outputs[cat][o]};
+                    delete result[cat][o].lastProcessed;
+                }
+            }
+            return result;
+        }
+        return {
+            key: this.key,
+            inputs: this.inputs,
+            outputs: sanitizeOutputs(this.outputs),
+            baseCost: this.baseCost,
+            costCoefficient: this.costCoefficient,
+            count: this.count,
+            maxCount: this.maxCount
+        };
+    }
+
+    deserialise(o) {
+        this.key = o.key;
+        this.inputs = o.inputs;
+        this.outputs = o.outputs;
+        this.baseCost = o.baseCost;
+        this.costCoefficient = o.costCoefficient;
+        this.count = o.count;
+        this.maxCount = o.maxCount;
+    }
+
     addOutputResource(key, productionTime, productionAmount) {
         if (!this.outputs.resources) {
             this.outputs.resources = {};

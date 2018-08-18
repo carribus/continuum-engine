@@ -8,6 +8,20 @@ export class Resource {
         this.engine = opts.engine;
     }
 
+    serialise() {
+        return {
+            key: this.key,
+            basePrice: this.basePrice,
+            count: this.count
+        };
+    }
+
+    deserialise(o) {
+        this.key = o.key;
+        this.basePrice = o.basePrice;
+        this.count = o.count;
+    }
+
     incrementBy(val) {
         this.count += val;
     }

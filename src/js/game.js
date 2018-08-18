@@ -52,6 +52,12 @@ window.onload = function() {
     createProducers();
     createResources();
     // createEntities();
+
+    engine.loadState();
+    console.log(engine);
+
+    engine.autosavePeriod = 1000;   // save every second
+
     connectUItoHandlers();
 
     console.log("%cIncremental Engine loaded and initialised", "color: blue");
