@@ -93,7 +93,7 @@ export class IncrementalEngine {
 
         if (this.lastSave) {
             if (dt - this.lastSave > this.autosavePeriod) {
-                console.log('Auto-save...');
+                // console.log('Auto-save...');
                 const state = {
                     lastTick: 0, //this.lastTick,
                     lastSave: 0, //this.lastSave,

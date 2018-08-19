@@ -26,16 +26,33 @@ function updateUI() {
 
     text += "<h2>Entities:</h2>";
 
+    const renderInputsOutputs = (o, type, category, data) => {
+        if (data && data[category]) {
+            const arrow = (type == "inputs" ? "<=" : "=>");
+            const [amount, time] = (type == "inputs" ? ["consumptionAmount", "consumptionTime"] : ["productionAmount", "productionTime"]);
+            Object.keys(data[category]).map((out) => {
+                text += `&nbsp;&nbsp;${arrow} ${out} = ${engine.formatNumber(data[category][out][amount]*o.count)} / ${data[category][out][time]}s<br/>`;
+            });
+        }
+    };
+
     for (key in engine.producers) {
         let producer = engine.producers[key];
-        text += `${key}s: ${engine.formatNumber(producer.count)}`;
+        text += `${key}s: ${engine.formatNumber(producer.count)}<br/>`;
+        renderInputsOutputs(producer, "inputs", "resources", producer.inputs);
+        renderInputsOutputs(producer, "outputs", "resources", producer.outputs);
+        text += "<br/>";
     }
 
     text += "<h2>Resources:</h2>"
 
     for (key in engine.resources) {
         let resource = engine.resources[key];
-        text += `${key}: ${engine.formatNumber(resource.count)}`;
+        if ( resource.count !== null && resource.count !== undefined ) {
+            text += `${key}: ${engine.formatNumber(resource.count)}<br/>`;
+        } else {
+            throw `Resource ${key} does not have a .count property`;
+        }
     }
 
     for (key in engine.entities) {
@@ -72,7 +89,7 @@ window.onload = function() {
 };
 
 function createCurrencies() {
-    engine.createCurrency("gold", 10);
+    engine.createCurrency("gold", 1000);
 }
 
 function createProducers() {
@@ -83,6 +100,10 @@ function createProducers() {
                 "Source Code": {
                     productionTime: 1000,
                     productionAmount: 1
+                },
+                "Bugs": {
+                    productionTime: 2000,
+                    productionAmount: 0.1
                 }
             }
         },
@@ -91,6 +112,39 @@ function createProducers() {
             amount: 5
         },
         costCoefficient: 1.1,
+        count: 0
+    });
+
+    engine.createProducer({
+        key: "QA Engineer",
+        inputs: {
+            resources: {
+                "Bugs": {
+                    consumptionTime: 500,
+                    consumptionAmount: 0.1
+                }
+            }
+        },
+        outputs: {
+            resources: {
+                "Clean Code": {
+                    inputRequirements: [
+                        {
+                            category: "resources",
+                            type: "Bugs",
+                            amount: 0.2
+                        }
+                    ],
+                    productionTime: 500,
+                    productionAmount: 0.1
+                }
+            }
+        },
+        baseCost: {
+            currency: "gold",
+            amount: 100
+        },
+        costCoefficient: 1.07,
         count: 0
     });
 }
@@ -104,6 +158,29 @@ function createResources() {
         },
         count: 0
     });
+
+    engine.createResource({
+        key: "Bugs",
+        // calculated: {
+        //     source: {
+        //         type: "resource",
+        //         key: "Source Code"
+        //     },
+        //     calcFunc: function(source) {
+        //         return source.count * 0.1;
+        //     }
+        // },
+        count: 0
+    })
+
+    engine.createResource({
+        key: "Clean Code",
+        basePrice: {
+            currency: "gold",
+            amount: 25
+        },
+        count: 0
+    })
 }
 
 function createEntities() {
@@ -128,30 +205,27 @@ function connectUItoHandlers() {
         "formatScientific": document.getElementById("formatScientific"),
         "formatDictionary": document.getElementById("formatDictionary"),
         "formatAbstract": document.getElementById("formatAbstract"),
+        "clearState": document.getElementById("clearstate"),
         "Programmer": {
             "Buy1": document.getElementById("BuyProgrammer1"),
+        },
+        "QA Engineer": {
+            "Buy1": document.getElementById("BuyQA1"),
         },
         "Source Code": {
             "SellAll": document.getElementById("SellSourceCodeAll"),
             "+": document.getElementById("SC+"),
             "-": document.getElementById("SC-")
         },
-        "Graphics": {
-            "+": document.getElementById("Graphics+"),
-            "-": document.getElementById("Graphics-")
+        "Bugs": {
+            "+": document.getElementById("Bugs+"),
+            "-": document.getElementById("Bugs-")
         },
-        "Sound": {
-            "+": document.getElementById("Sound+"),
-            "-": document.getElementById("Sound-")
+        "Clean Code": {
+            "SellAll": document.getElementById("SellCleanCodeAll"),
+            "+": document.getElementById("Clean Code+"),
+            "-": document.getElementById("Clean Code-")
         },
-        "Text": {
-            "+": document.getElementById("Text+"),
-            "-": document.getElementById("Text-")
-        },
-        "Translations": {
-            "+": document.getElementById("Translations+"),
-            "-": document.getElementById("Translations-")
-        }
     };
 
     // formatter buttons
@@ -159,8 +233,13 @@ function connectUItoHandlers() {
     buttons.formatDictionary.addEventListener("click", (e) => { engine.setNumberFormatter("dictionary") });
     buttons.formatAbstract.addEventListener("click", (e) => { engine.setNumberFormatter("abstract") });
 
+    buttons.clearState.addEventListener("click", (e) => { 
+        window.localStorage.clear();
+        window.location.reload(true);
+    });
+
     // game and dev control buttons
-    for (let key of ["Programmer", "Source Code", "Graphics", "Sound", "Text", "Translations"]) {
+    for (let key of ["Programmer", "QA Engineer", "Source Code", "Bugs", "Clean Code"]) {
         if (buttons[key]["Buy1"]) {
             buttons[key]["Buy1"].addEventListener("click", (e) => {
                 if (e.target.dataset.producer) {
@@ -174,18 +253,8 @@ function connectUItoHandlers() {
                         e.target.innerHTML = `Buy 1 for ${producer.calculateCost(1)} ${producer.baseCost.currency}`;
                     }
                 } 
-/*                
-                const baseCost = parseFloat(e.target.dataset.basecost);
-                const cost = Math.round(parseFloat(e.target.dataset.cost));
-                const entity = e.target.dataset.entity;
-                if (engine.currency("gold").value - cost >= 0) {
-                    engine.currency("gold").incrementBy(-cost);
-                    engine.entities[entity].incrementBy += 1;
-                    e.target.dataset.cost = Math.round(baseCost * Math.pow(1.1, engine.entities[entity].incrementBy));
-                    e.target.innerHTML = `Buy 1 @ ${e.target.dataset.cost} gold`;
-                }
-*/                
             });
+            buttons[key]["Buy1"].innerHTML = `Buy 1 @ ${engine.producers[key].calculateCost(1)} ${engine.producers[key].baseCost.currency}`;
         }
         if (buttons[key]["SellAll"]) {
             buttons[key]["SellAll"].addEventListener("click", (e) => {
@@ -201,15 +270,15 @@ function connectUItoHandlers() {
         if (buttons[key]["+"]) {
             buttons[key]["+"].addEventListener("click", (e) => {
                 const entity = e.target.dataset.entity;
-                engine.entities[entity].incrementBy += parseFloat(e.target.dataset.incrementby);
+                engine.resources[entity].incrementBy(parseFloat(e.target.dataset.incrementby));
             });
         }
         if (buttons[key]["-"]) {
             buttons[key]["-"].addEventListener("click", (e) => {
                 const entity = e.target.dataset.entity;
-                engine.entities[entity].incrementBy += parseFloat(e.target.dataset.incrementby);
-                if ( engine.entities[entity].incrementBy < 0 ) {
-                    engine.entities[entity].incrementBy = 0;
+                engine.resources[entity].incrementBy(parseFloat(e.target.dataset.incrementby));
+                if ( engine.resources[entity].incrementBy < 0 ) {
+                    engine.resources[entity].incrementBy = 0;
                 }
             });
         }

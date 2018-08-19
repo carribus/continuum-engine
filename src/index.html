@@ -14,16 +14,18 @@
         <button id="formatAbstract">Abstract</button>
         <hr/>
         <h1>Game Controls</h1>
-        Programmers: <button id="BuyProgrammer1" data-producer="Programmer">Buy 1 @ 5 gold</button>
-        <br>
+        Programmers: <button id="BuyProgrammer1" data-producer="Programmer"></button>
+        <br/>
+        QA Engineers: <button id="BuyQA1" data-producer="QA Engineer"></button>
+        <hr/>
         Source Code: <button id="SellSourceCodeAll" data-resource="Source Code">Sell all</button>
+        Clean Code: <button id="SellCleanCodeAll" data-resource="Clean Code">Sell all</button>
         <hr/>
         <h1>Dev Controls</h1>
-        Source Code: <button id="SC+" data-entity="Source Code" data-incrementBy="10">+</button><button id="SC-" data-entity="Source Code" data-incrementBy="-10">-</button><br/> 
-        Graphics: <button id="Graphics+" data-entity="Graphics" data-incrementBy="2">+</button><button id="Graphics-" data-entity="Graphics" data-incrementBy="-2">-</button><br/>
-        Sound: <button id="Sound+" data-entity="Sound" data-incrementBy="1">+</button><button id="Sound-" data-entity="Sound" data-incrementBy="-1">-</button><br/>
-        Text: <button id="Text+" data-entity="Text" data-incrementBy="1">+</button><button id="Text-" data-entity="Text" data-incrementBy="-1">-</button><br/>
-        Translations: <button id="Translations+" data-entity="Translations" data-incrementBy="0.1">+</button><button id="Translations-" data-entity="Translations" data-incrementBy="-0.1">-</button><br/>
+        <button id="clearstate">Clear State</button><br/>
+        Source Code: <button id="SC+" data-entity="Source Code" data-incrementBy="1">+</button><button id="SC-" data-entity="Source Code" data-incrementBy="-1">-</button><br/> 
+        Bugs: <button id="Bugs+" data-entity="Bugs" data-incrementBy="10">+</button><button id="Bugs-" data-entity="Bugs" data-incrementBy="-10">-</button><br/>
+        Clean Code: <button id="Clean Code+" data-entity="Clean Code" data-incrementBy="1">+</button><button id="CleanCode-" data-entity="Clean Code" data-incrementBy="-1">-</button><br/>
     </div>
     <script type="module" src="js/game.js"></script>
     <script type="module" src="js/engine.js"></script>

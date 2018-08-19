@@ -1,74 +1,53 @@
 export class Producer {
     constructor(opts) {
-        this.key = opts.key;
+        this.state = {
+            key: opts.key,
+            baseCost: opts.baseCost,
+            costCoefficient: opts.costCoefficient,
+            count: opts.count || 0,
+            maxCount: opts.maxCount,
+            consumedInputs: {},
+        }
         this.inputs = opts.inputs || {};
         this.outputs = opts.outputs || { resources: {}, producers: {} };
-
-        this.baseCost = opts.baseCost;
-        this.costCoefficient = opts.costCoefficient || 1;
-        this.count = opts.count || 0;
-        this.maxCount = opts.maxCount || Number.MAX_VALUE;
 
         this.engine = opts.engine;
     }
 
     serialise() {
-        const sanitizeOutputs = (op) => {
-            const result = {};
-            for (const cat in this.outputs) {
-                result[cat] = {};
-                for (const o in this.outputs[cat]) {
-                    result[cat][o] = {...this.outputs[cat][o]};
-                    delete result[cat][o].lastProcessed;
-                }
-            }
-            return result;
-        }
-        return {
-            key: this.key,
-            inputs: this.inputs,
-            outputs: sanitizeOutputs(this.outputs),
-            baseCost: this.baseCost,
-            costCoefficient: this.costCoefficient,
-            count: this.count,
-            maxCount: this.maxCount
-        };
+        return this.state;
     }
 
     deserialise(o) {
-        this.key = o.key;
-        this.inputs = o.inputs;
-        this.outputs = o.outputs;
-        this.baseCost = o.baseCost;
-        this.costCoefficient = o.costCoefficient;
-        this.count = o.count;
-        this.maxCount = o.maxCount;
+        this.state = o;
     }
 
-    addOutputResource(key, productionTime, productionAmount) {
-        if (!this.outputs.resources) {
-            this.outputs.resources = {};
-        }
-        if (this.outputs.resources && !this.outputs.resources[key]) {
-            this.output.resources[key] = {
-                productionTime,
-                productionAmount
-            };
-        }
-        return this;
+    get key() {
+        return this.state.key;
     }
 
-    addOutputProducer(key, productionTime, productionAmount) {
-        if (!this.outputs.producers) {
-            this.outputs.producers = {};
-        }
-        if (!this.output.producers[key]) {
-            this.output.producers[key] = {
-                productionTime,
-                productionAmount
-            };
-        }
-        return this;
+    get baseCost() {
+        return this.state.baseCost;
+    }
+
+    get costCoefficient() {
+        return this.state.costCoefficient;
+    }
+
+    get count() {
+        return this.state.count;
+    }
+
+    set count(v) {
+        this.state.count = v;
+    }
+
+    get maxCount() {
+        return this.state.maxCount;
+    }
+
+    get consumedInputs() {
+        return this.state.consumedInputs;
     }
 
     setCustomProcessor(processFunc) {
@@ -82,37 +61,113 @@ export class Producer {
         let cost = 0;
 
         for (let i = 0; i < count; i++) {
-            cost += Math.round(this.baseCost.amount * Math.pow(this.costCoefficient, this.count+i));
+            cost += Math.round(this.state.baseCost.amount * Math.pow(this.state.costCoefficient, this.state.count+i));
         }
         return cost;
     }
 
     processTick(dt) {
-        let lastProcessed, outputRules, outputObj;
+        let lastProcessed, rules, obj;
+        const result = this.state.consumedInputs;
 
-        if (this.count > 0) {
-            // loop through the output categories
-            for (const outputCategory in this.outputs) {
-                for (const outputKey in this.outputs[outputCategory]) {
-                    outputRules = this.outputs[outputCategory][outputKey];
-                    lastProcessed = outputRules.lastProcessed || 0;
-
-                    outputObj = this.engine[outputCategory][outputKey];
-                    if (outputObj) {
-                        if (outputRules.productionTime > 0 && dt - lastProcessed >= outputRules.productionTime) {
-                            let incrementBy = (this.count * outputRules.productionAmount * Math.trunc((dt-lastProcessed)/outputRules.productionTime));
-                            outputObj.incrementBy(incrementBy);
-        
-                            // constraint check
-                            if (this.count > this.maxCount) this.count = this.maxCount;
-                            outputRules.lastProcessed = dt;
+        const processInputs = () => {
+            if (this.state.count <= 0) return;
+            // loop through the input categories
+            Object.keys(this.inputs).map((cat) => {
+                Object.keys(this.inputs[cat]).map((input) => {
+                    rules = this.inputs[cat][input];
+                    lastProcessed = rules.lastProcessed || 0;
+                    obj = this.engine[cat][input];
+                    
+                    if (obj) {
+                        if (rules.consumptionTime > 0 && dt - lastProcessed >= rules.consumptionTime) {
+                            let consumeBy = Math.min(obj.count, (this.state.count * rules.consumptionAmount * Math.trunc((dt-lastProcessed)/rules.consumptionTime)));
+                            obj.incrementBy(-consumeBy);
+                            if (consumeBy) {
+                                result[cat] = result[cat] || {};
+                                result[cat][input] = result[cat][input] || { amount: 0 };
+                                result[cat][input].amount += consumeBy;
+                            }
+                            rules.lastProcessed = dt;
                         }
                     } else {
-                        throw `Output object not found:\n\tType: ${outputCategory}\n\tKey: ${outputKey}`
+                        throw `Input object not found:\n\tType: ${cat}\n\tKey: ${input}`
                     }
+                });
+            });
+        }
 
+        const processOutputs = () => {
+            const inputRequirementsMet = (reqs) => {
+                if (!reqs) return true;
+
+                for (const rc of reqs) {
+                    if ( this.state.consumedInputs[rc.category] && this.state.consumedInputs[rc.category][rc.type] ) {
+                        if (this.state.consumedInputs[rc.category][rc.type].amount < rc.amount) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            };
+
+            const clampByConsumedInputs = (count, reqs) => {
+                if (!reqs) return count;
+
+                for (const rc of reqs) {
+                    let maxConsumable = Math.min(count*rc.amount, this.state.consumedInputs[rc.category][rc.type].amount);
+                    if ( maxConsumable >= rc.amount ) {
+                        count = Math.min(count, maxConsumable/rc.amount);
+                    }
+                }
+
+                return count;
+            }
+
+            const reduceConsumpedInputsBy = (count, reqs) => {
+                if (!reqs) return;
+
+                for (const rc of reqs) {
+                    this.state.consumedInputs[rc.category][rc.type].amount -= count*rc.amount;
                 }
             }
+
+            if ( this.state.count > 0 ) {
+                Object.keys(this.outputs).map((cat) => {
+                    Object.keys(this.outputs[cat]).map((output) => {
+                        rules = this.outputs[cat][output];
+                        lastProcessed = rules.lastProcessed || 0;
+                        obj = this.engine[cat][output];
+    
+                        if (obj) {
+                            if (rules.productionTime > 0 && dt - lastProcessed >= rules.productionTime) {
+                                if (inputRequirementsMet(rules.inputRequirements)) {
+                                    let clampedCount = clampByConsumedInputs(this.state.count, rules.inputRequirements);
+                                    const incrementBy = (clampedCount * rules.productionAmount * Math.trunc((dt-lastProcessed)/rules.productionTime));
+
+                                    if (obj.key == "Clean Code") {
+                                        console.log(`${obj.key}: Increment By ${incrementBy}`);
+                                    };
+                                    obj.incrementBy(incrementBy);
+                                    reduceConsumpedInputsBy(clampedCount, rules.inputRequirements);
+                
+                                    // constraint check
+                                    if (this.state.count > this.state.maxCount) this.state.count = this.state.maxCount;
+                                    rules.lastProcessed = dt;
+                                };
+                            }
+                        } else {
+                            throw `Output object not found:\n\tType: ${cat}\n\tKey: ${input}`
+                        }
+                    });
+                });
+            }
         }
+
+        processInputs();
+        processOutputs();
+
     }
 }
