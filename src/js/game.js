@@ -7,7 +7,7 @@ const engine = new IncrementalEngine();
  * @param {} dt 
  */
 const onTick = (dt) => {
-    engine.onTick(dt);
+    engine.onTick(Date.now());
     updateUI();
     window.requestAnimationFrame(onTick);
 }

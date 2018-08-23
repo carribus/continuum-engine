@@ -76,22 +76,27 @@ export class Producer {
             Object.keys(this.inputs).map((cat) => {
                 Object.keys(this.inputs[cat]).map((input) => {
                     rules = this.inputs[cat][input];
-                    lastProcessed = rules.lastProcessed || 0;
+                    lastProcessed = rules.lastProcessed;
                     obj = this.engine[cat][input];
                     
-                    if (obj) {
-                        if (rules.consumptionTime > 0 && dt - lastProcessed >= rules.consumptionTime) {
-                            let consumeBy = Math.min(obj.count, (this.state.count * rules.consumptionAmount * Math.trunc((dt-lastProcessed)/rules.consumptionTime)));
-                            obj.incrementBy(-consumeBy);
-                            if (consumeBy) {
-                                result[cat] = result[cat] || {};
-                                result[cat][input] = result[cat][input] || { amount: 0 };
-                                result[cat][input].amount += consumeBy;
+                    if (lastProcessed) {
+                        if (obj) {
+                            if (rules.consumptionTime > 0 && dt - lastProcessed >= rules.consumptionTime) {
+                                let consumeBy = Math.min(obj.count, (this.state.count * rules.consumptionAmount * Math.trunc((dt-lastProcessed)/rules.consumptionTime)));
+                                console.log(`Input consumedBy = ${consumeBy}`);
+                                obj.incrementBy(-consumeBy);
+                                if (consumeBy) {
+                                    result[cat] = result[cat] || {};
+                                    result[cat][input] = result[cat][input] || { amount: 0 };
+                                    result[cat][input].amount += consumeBy;
+                                }
+                                rules.lastProcessed = dt;
                             }
-                            rules.lastProcessed = dt;
+                        } else {
+                            throw `Input object not found:\n\tType: ${cat}\n\tKey: ${input}`
                         }
                     } else {
-                        throw `Input object not found:\n\tType: ${cat}\n\tKey: ${input}`
+                        rules.lastProcessed = dt;
                     }
                 });
             });
@@ -138,28 +143,32 @@ export class Producer {
                 Object.keys(this.outputs).map((cat) => {
                     Object.keys(this.outputs[cat]).map((output) => {
                         rules = this.outputs[cat][output];
-                        lastProcessed = rules.lastProcessed || 0;
+                        lastProcessed = rules.lastProcessed;
                         obj = this.engine[cat][output];
-    
-                        if (obj) {
-                            if (rules.productionTime > 0 && dt - lastProcessed >= rules.productionTime) {
-                                if (inputRequirementsMet(rules.inputRequirements)) {
-                                    let clampedCount = clampByConsumedInputs(this.state.count, rules.inputRequirements);
-                                    const incrementBy = (clampedCount * rules.productionAmount * Math.trunc((dt-lastProcessed)/rules.productionTime));
 
-                                    if (obj.key == "Clean Code") {
-                                        console.log(`${obj.key}: Increment By ${incrementBy}`);
+                        if (lastProcessed) {
+                            if (obj) {
+                                if (rules.productionTime > 0 && dt - lastProcessed >= rules.productionTime) {
+                                    if (inputRequirementsMet(rules.inputRequirements)) {
+                                        let clampedCount = clampByConsumedInputs(this.state.count, rules.inputRequirements);
+                                        const incrementBy = (clampedCount * rules.productionAmount * Math.trunc((dt-lastProcessed)/rules.productionTime));
+    
+                                        if (obj.key == "Clean Code") {
+                                            console.log(`${obj.key}: Increment By ${incrementBy}`);
+                                        };
+                                        obj.incrementBy(incrementBy);
+                                        reduceConsumpedInputsBy(clampedCount, rules.inputRequirements);
+                    
+                                        // constraint check
+                                        if (this.state.count > this.state.maxCount) this.state.count = this.state.maxCount;
+                                        rules.lastProcessed = dt;
                                     };
-                                    obj.incrementBy(incrementBy);
-                                    reduceConsumpedInputsBy(clampedCount, rules.inputRequirements);
-                
-                                    // constraint check
-                                    if (this.state.count > this.state.maxCount) this.state.count = this.state.maxCount;
-                                    rules.lastProcessed = dt;
-                                };
+                                }
+                            } else {
+                                throw `Output object not found:\n\tType: ${cat}\n\tKey: ${input}`
                             }
                         } else {
-                            throw `Output object not found:\n\tType: ${cat}\n\tKey: ${input}`
+                            rules.lastProcessed = dt;
                         }
                     });
                 });
