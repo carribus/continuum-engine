@@ -83,7 +83,7 @@ export class Producer {
                         if (obj) {
                             if (rules.consumptionTime > 0 && dt - lastProcessed >= rules.consumptionTime) {
                                 let consumeBy = Math.min(obj.count, (this.state.count * rules.consumptionAmount * Math.trunc((dt-lastProcessed)/rules.consumptionTime)));
-                                console.log(`Input consumedBy = ${consumeBy}`);
+                                
                                 obj.incrementBy(-consumeBy);
                                 if (consumeBy) {
                                     result[cat] = result[cat] || {};
@@ -150,12 +150,12 @@ export class Producer {
                             if (obj) {
                                 if (rules.productionTime > 0 && dt - lastProcessed >= rules.productionTime) {
                                     if (inputRequirementsMet(rules.inputRequirements)) {
-                                        let clampedCount = clampByConsumedInputs(this.state.count, rules.inputRequirements);
-                                        const incrementBy = (clampedCount * rules.productionAmount * Math.trunc((dt-lastProcessed)/rules.productionTime));
+                                        // calculate the number of times this calculation "should" have executed since the last execution
+                                        let timeMultiple = Math.trunc((dt-lastProcessed)/rules.productionTime);
+                                        // clamp to the minimum possible consumable inputs
+                                        let clampedCount = clampByConsumedInputs(this.state.count*timeMultiple, rules.inputRequirements);
+                                        const incrementBy = clampedCount * rules.productionAmount;
     
-                                        if (obj.key == "Clean Code") {
-                                            console.log(`${obj.key}: Increment By ${incrementBy}`);
-                                        };
                                         obj.incrementBy(incrementBy);
                                         reduceConsumpedInputsBy(clampedCount, rules.inputRequirements);
                     
