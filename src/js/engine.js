@@ -5,6 +5,7 @@ import { formatAbstractNumber } from "./formatters/number_abstract.js";
 import { Currency } from "./currency.js";
 import { Producer } from "./producer.js";
 import { Resource } from "./resource.js";
+import { Modifier } from "./modifier.js";
 
 const NUMBER_FORMATTERS = {
     "scientific": formatScientificNumber,
@@ -20,6 +21,8 @@ export class IncrementalEngine {
         this.currencies = {};
         this.producers = {};
         this.resources = {};
+        this.modifiers = {};
+        this.activeModifiers = [];
         this.entities = {};
         this.numberFormatter = formatDictionaryNumber;
         this.autosavePeriod = 0;
@@ -57,6 +60,15 @@ export class IncrementalEngine {
         return this.resources[opts.key];
     }
 
+    createModifier(opts) {
+        if (!opts) throw "No modifier options provided";
+        if (!opts.key) throw `Invalid modifier type value provider ${opts.key}`;
+        if (!this.modifiers[opts.key]) {
+            this.modifiers[opts.key] = new Modifier(opts);
+        }
+        return this.modifiers[opts.key];
+    }
+
     createEntity(key, incrementAfter, incrementBy, startingCount, maxCount) {
         if (!this.entities[key]) {
             this.entities[key] = new Entity(key, incrementAfter, incrementBy, startingCount, maxCount);
@@ -65,12 +77,36 @@ export class IncrementalEngine {
         return this.entities[key];
     }
 
+    // TODO: You need to probably rewrite this. You want to be able to apply the effect of the modifier here
+    //       and for time-limited modifiers, remove the effect of the modifier when the modifier expires
+    activateModifier(key, opts) {
+        if (this.modifiers[key]) {
+            const modifier = {
+                key: key,
+                expiresAt: opts.timeLeft ? Date.now() + opts.timeLeft : null,
+            }
+            // apply the modifier
+            for (const producer in this.producers) {
+                this.modifiers[key].apply("producer", this.producers[producer]);
+            }
+            for (const resource in this.resources) {
+                this.modifiers[key].apply("resource", this.resources[resource]);
+            }
+
+            // store the modifier in the active modifiers array
+            this.activeModifiers.push(modifier);
+        } else {
+            console.error(`Modifier ${key} not found and cannot be activated`);
+        }
+    }
+
     onTick(dt) {
         if (this.lastTick) {
             if (dt - this.lastTick > 50 ) {
                 this.processProducers(dt);
                 this.processResources(dt);
                 this.processEntities(dt);
+                this.processModifiers(dt);
                 // store the last tick that we did processing on
                 this.lastTick = dt;
             }
@@ -161,6 +197,24 @@ export class IncrementalEngine {
         for (const key in this.resources) {
             resource = this.resources[key];
             resource.processTick(dt);
+        }
+    }
+
+    processModifiers(dt) {
+        let modifier;
+        for ( let i = this.activeModifiers.length-1; i >= 0; i-- ) {
+            modifier = this.activeModifiers[i];
+            if (modifier.expiresAt < Date.now()) {
+                // deactivate the modifier
+                for (const producer in this.producers) {
+                    this.modifiers[modifier.key].remove("producer", this.producers[producer]);
+                }
+                for (const resource in this.resources) {
+                    this.modifiers[modifier.key].remove("resource", this.resources[resource]);
+                }
+                // remove the modifier from the active modifiers list
+                this.activeModifiers.splice(i, 1);
+            }
         }
     }
 

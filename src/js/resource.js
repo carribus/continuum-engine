@@ -40,7 +40,7 @@ export class Resource {
             amountToSell = amountToSell || this.state.count;
             return { currency: this.state.basePrice.currency, amount: amountToSell * this.state.basePrice.amount };
         }
-        return 0;
+        return null;
     }
 
     processTick(dt) {

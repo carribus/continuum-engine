@@ -10,6 +10,7 @@ export class Producer {
         }
         this.inputs = opts.inputs || {};
         this.outputs = opts.outputs || { resources: {}, producers: {} };
+        this.postProcessors = opts.postProcessors;
 
         this.engine = opts.engine;
     }
@@ -83,7 +84,7 @@ export class Producer {
                         if (obj) {
                             if (rules.consumptionTime > 0 && dt - lastProcessed >= rules.consumptionTime) {
                                 let consumeBy = Math.min(obj.count, (this.state.count * rules.consumptionAmount * Math.trunc((dt-lastProcessed)/rules.consumptionTime)));
-                                
+
                                 obj.incrementBy(-consumeBy);
                                 if (consumeBy) {
                                     result[cat] = result[cat] || {};
@@ -156,11 +157,9 @@ export class Producer {
                                         let clampedCount = clampByConsumedInputs(this.state.count*timeMultiple, rules.inputRequirements);
                                         const incrementBy = clampedCount * rules.productionAmount;
     
-                                        obj.incrementBy(incrementBy);
                                         reduceConsumpedInputsBy(clampedCount, rules.inputRequirements);
+                                        obj.incrementBy(incrementBy);
                     
-                                        // constraint check
-                                        if (this.state.count > this.state.maxCount) this.state.count = this.state.maxCount;
                                         rules.lastProcessed = dt;
                                     };
                                 }
@@ -175,8 +174,19 @@ export class Producer {
             }
         }
 
+        const runPostProcessors = () => {
+            if (this.postProcessors) {
+                Object.keys(this.postProcessors).forEach((pp) => {
+                    const stack = this.postProcessors[pp].stack || null;
+                    if (this.postProcessors[pp].func) {
+                        this.postProcessors[pp].func(this, stack);
+                    }
+                });
+            }
+        }
+
         processInputs();
         processOutputs();
-
+        runPostProcessors();
     }
 }

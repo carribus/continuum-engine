@@ -68,6 +68,7 @@ window.onload = function() {
     createCurrencies();
     createProducers();
     createResources();
+    createModifiers();
     // createEntities();
 
     engine.loadState();
@@ -98,11 +99,11 @@ function createProducers() {
         outputs: {
             resources: {
                 "Source Code": {
-                    productionTime: 1000,
+                    productionTime: 500,
                     productionAmount: 1
                 },
                 "Bugs": {
-                    productionTime: 2000,
+                    productionTime: 750,
                     productionAmount: 0.1
                 }
             }
@@ -111,8 +112,25 @@ function createProducers() {
             currency: "gold",
             amount: 5
         },
-        costCoefficient: 1.1,
-        count: 0
+        costCoefficient: 1.08,
+        count: 0,
+        postProcessors: {
+            acceleration: {
+                func: function(o, stack) {
+                    const milestones = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000];
+                    const currentMilestone = o.milestoneValue || 0;
+                    milestones.forEach((milestoneValue) => {
+                        if ( o.count >= milestoneValue ) {
+                            if (currentMilestone < milestoneValue) {
+                                o.outputs.resources["Source Code"].productionTime -= 20;
+                                o.outputs.resources["Bugs"].productionTime -= 25;
+                                o.milestoneValue = milestoneValue;
+                            }
+                        }
+                    });
+                }
+            }
+        }
     });
 
     engine.createProducer({
@@ -183,6 +201,52 @@ function createResources() {
     })
 }
 
+function createModifiers() {
+    engine.createModifier({
+        key: "DoubleProd",
+        applyFunc: function(entityType, entity) {
+            if (entityType === "producer") {
+                for (const res in entity.outputs.resources) {
+                    entity.outputs.resources[res].productionAmount *= 2;
+                }
+            }
+        },
+        removeFunc: function(entityType, entity) {
+            if (entityType === "producer") {
+                for (const res in entity.outputs.resources) {
+                    entity.outputs.resources[res].productionAmount /= 2;
+                }
+            }
+        }
+    });
+
+    engine.createModifier({
+        key: "AutoSell",
+        applyFunc: function(entityType, entity) {
+            if (entityType === "resource") {
+                entity.oldIncrementBy = entity.incrementBy;
+                entity.incrementBy = (val) => {
+                    entity.oldIncrementBy.call(entity, val);
+                    const price = entity.calculatePrice();
+
+                    if (price) {
+                        engine.currencies[price.currency].incrementBy(price.amount);
+                        entity.oldIncrementBy.call(entity, -entity.count);
+                    }
+                }
+            }
+        },
+        removeFunc: function(entityType, entity) {
+            if (entityType === "resource") {
+                if (entity.oldIncrementBy) {
+                    entity.incrementBy = entity.oldIncrementBy;
+                    delete entity.oldIncrementBy;
+                }
+            }
+        }
+    })
+}
+
 function createEntities() {
     engine.createEntity("Source Code", 1000, 1).setCustomProcessor(function(dt) {
         let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
@@ -206,12 +270,14 @@ function connectUItoHandlers() {
         "formatDictionary": document.getElementById("formatDictionary"),
         "formatAbstract": document.getElementById("formatAbstract"),
         "clearState": document.getElementById("clearstate"),
+        // producers
         "Programmer": {
             "Buy1": document.getElementById("BuyProgrammer1"),
         },
         "QA Engineer": {
             "Buy1": document.getElementById("BuyQA1"),
         },
+        // resources
         "Source Code": {
             "SellAll": document.getElementById("SellSourceCodeAll"),
             "+": document.getElementById("SC+"),
@@ -226,6 +292,12 @@ function connectUItoHandlers() {
             "+": document.getElementById("Clean Code+"),
             "-": document.getElementById("Clean Code-")
         },
+        // modifiers
+        "Modifiers": {
+            "DoubleProd10s": document.getElementById("Mod_DoubleProduction10s"),
+            "DoubleProd30s": document.getElementById("Mod_DoubleProduction30s"),
+            "AutoSell60s": document.getElementById("Mod_AutoSell60s")
+        }
     };
 
     // formatter buttons
@@ -250,11 +322,11 @@ function connectUItoHandlers() {
                     if (engine.currencies[currencyType].value - cost >= 0) {
                         engine.currencies[currencyType].incrementBy(-cost);
                         producer.count += 1;
-                        e.target.innerHTML = `Buy 1 for ${producer.calculateCost(1)} ${producer.baseCost.currency}`;
+                        e.target.innerHTML = `Buy 1 for ${engine.formatNumber(producer.calculateCost(1))} ${producer.baseCost.currency}`;
                     }
                 } 
             });
-            buttons[key]["Buy1"].innerHTML = `Buy 1 @ ${engine.producers[key].calculateCost(1)} ${engine.producers[key].baseCost.currency}`;
+            buttons[key]["Buy1"].innerHTML = `Buy 1 @ ${engine.formatNumber(engine.producers[key].calculateCost(1))} ${engine.producers[key].baseCost.currency}`;
         }
         if (buttons[key]["SellAll"]) {
             buttons[key]["SellAll"].addEventListener("click", (e) => {
@@ -282,5 +354,17 @@ function connectUItoHandlers() {
                 }
             });
         }
+    }
+
+    // modifier buttons
+    for (const modBtn in buttons.Modifiers) {
+        buttons.Modifiers[modBtn].addEventListener("click", (e) => {
+            const modifierKey = e.target.dataset.modifier;
+            let params = e.target.dataset.params;
+
+            engine.activateModifier(modifierKey, {
+                timeLeft: parseInt(params)*1000
+            });
+        });
     }
 }
