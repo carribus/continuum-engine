@@ -81,11 +81,15 @@ function createProducers() {
         }
     }).on("PRODUCER_COUNT_UPDATED", (e) => {
         console.log(`PRODUCER_COUNT_UPDATED: ${e.key} = ${e.count} (diff: ${e.delta})`);
-
     });
 
     engine.createProducer({
         key: "QA Engineer",
+        requirements: {
+            producers: {
+                "Programmer": 10
+            }
+        },
         inputs: {
             resources: {
                 "Bugs": {
@@ -326,7 +330,7 @@ function connectUItoHandlers() {
             buttons[key]["Buy1"].addEventListener("click", (e) => {
                 if (e.target.dataset.producer) {
                     const producer = engine.producers[e.target.dataset.producer];
-                    if ( producer ) {
+                    if ( producer && producer.requirementsMet() ) {
                         const currencyType = producer.baseCost.currency;
                         const cost = producer.calculateCost(1);
     

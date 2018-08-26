@@ -8,7 +8,6 @@ export class Producer extends Entity {
         this.state.consumedInputs = {};
         this.inputs = opts.inputs || {};
         this.outputs = opts.outputs || { resources: {}, producers: {} };
-        this.hooks = {};
         this.postProcessors = opts.postProcessors;
 
         this.engine = opts.engine;

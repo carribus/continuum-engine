@@ -24,7 +24,36 @@ Producers can have a cost associated with them, along with a co-efficient. If a 
 #### Resources
 
 As mentioned in the Producer's description above, a Resource is a thing that is created (or consumed) by a Producer (generally speaking). Resources generate events when their 'count' changes that other parts of your code can subscribe to and react are you need. 
-
+ˀ
 ### Currencies
 
 The engine also supports the concept of currencies. You can create as many (or as few) currencies as you wish. Currencies are interesting because they can be used to set 'purchase costs' for Producers and 'sell prices' for Resources. 
+
+
+## Producer definition
+
+To create a producer, you call the `engine.createProducer()` method and pass in an object which contains one or more of the following properties:
+
+| Property          | Required?     | Type      | Description                                                       |
+|-----------        |------------   | ------    |-----------------------------------------------------------------  |
+| key               | Required      | `string`  | The identifier for the Producer entity                            |
+| count             | *optional*    | `integer` | (Inherited from Entity) The starting number of producers         |
+| maxCount          | *optional*    | `integer` | (Inherited from Entity) Maximum number of producers that are allowed |
+| baseCost          | Required      | `Currency`| The base cost for the first producer.                             |
+| costCoefficient   | Required      | `Number`  | The cost co-efficient to be used for scaling the cost. For example: 1.07 |
+| outputs           | Required      | `OutputMap` | A structure of outputs that the producer will produce        |
+| inputs            | *optional*    | `InputMap` | A structure of inputs that the producer will consume for its outputs |
+| requirements      | *optional*    | `RequirementMap` | (Inherited from Entity) A structure of requirements that the producer needs to be satisfied before |it can be created |
+| postProcessors    | *optional*    | `PostProcessorMap` | A structure that contains developer-named post processing functions that execute after inputs and outputs have been processed |
+
+
+### OutputMap
+
+
+### InputMap
+
+
+### RequirementMap
+
+
+### PostProcessorMap

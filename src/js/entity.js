@@ -10,6 +10,8 @@ export class Entity extends EventEmitter {
             count: opts.count || 0,
             maxCount: opts.maxCount || Number.MAX_VALUE,
         }
+        this.requirements = opts.requirements;
+        if ( this.requirements ) console.log(this.requirements);
         this.lastProcessed = 0;
         this.engine = null;
     }
@@ -37,6 +39,20 @@ export class Entity extends EventEmitter {
             count: this.state.count,
             delta: this.state.count-origValue
         });
+    }
+
+    requirementsMet() {
+        if (this.requirements) {
+            for (const cat in this.requirements) {
+                for (const key in this.requirements[cat]) {
+                    if ( this.engine[cat] && this.engine[cat][key] ) {
+                        if ( this.engine[cat][key].count < this.requirements[cat][key] )
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     onTick(dt) {
