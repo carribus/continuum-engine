@@ -104,7 +104,7 @@ function createProducers() {
                     inputRequirements: [
                         {
                             category: "resources",
-                            type: "Bugs",
+                            key: "Bugs",
                             amount: 0.2
                         }
                     ],

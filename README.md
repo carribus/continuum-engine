@@ -32,10 +32,10 @@ The engine also supports the concept of currencies. You can create as many (or a
 
 ## Producer definition
 
-To create a producer, you call the `engine.createProducer()` method and pass in an object which contains one or more of the following properties:
+To create a producer, you call the `engine.createProducer(defObj)` method and pass in an object which contains one or more of the following properties:
 
 | Property          | Required?     | Type      | Description                                                       |
-|-----------        |------------   | ------    |-----------------------------------------------------------------  |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
 | key               | Required      | `string`  | The identifier for the Producer entity                            |
 | count             | *optional*    | `integer` | (Inherited from Entity) The starting number of producers         |
 | maxCount          | *optional*    | `integer` | (Inherited from Entity) Maximum number of producers that are allowed |
@@ -48,9 +48,53 @@ To create a producer, you call the `engine.createProducer()` method and pass in 
 
 
 ### OutputMap
+The `OutputMap` object must contain *at least* one output category (for example, `resources` or `producers`).
+
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| resources         | *optional*    | OutputRuleMap | A map of 1 or more output rules (one per resource)            |
+| producers         | *optional*    | OutputRuleMap | A map of 1 or more output rules (one per producer)            |
+
+Each property within the `resources` or `producers` OutputRuleMap must correspond to a resource or producer key in the system.
+
+#### OutputRule
+The `OutputRule` object defines the rules for a producer's output of a specific Entity type
+
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| productionAmount  | Required      | `Number`  | The amount of the output entity to create (eg 0.1, 1, 2.5 etc) per `productionTime` period   |
+| productionTime    | Required      | `integer` | The time it takes for the `productionAmount` of output entity to be created             |
+| inputRequirements | *optional*    | `array[InputRequirement]` | An array of input requirements. This defines the inputs needed to create the entity. Should only be used if the producer has `inputs` specified |
+
+#### InputRequirement
+
+The `InputRequirement` object defines the required amount of *input* entity that must have been consumed in order to create the required output Entity that the InputRequirements refer to.
+
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| category          | Required      | `string`  | The entity type for the input (eg `resources` or `producers`)     |
+| key               | Required      | `string`  | The key (identifier) of the Entity that is the requirement        |
+| amount            | Required      | `Number`  | The minimum amount of the input Entity required to have been consumed to create the outputs |
 
 
 ### InputMap
+The `InputMap` object must contain *at least* one output category (for example, `resources` or `producers`).
+
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| resources         | *optional*    | InputRuleMap | A map of 1 or more input rules (one per resource)            |
+| producers         | *optional*    | InputRuleMap | A map of 1 or more input rules (one per producer)            |
+
+Each property within the `resources` or `producers` InputRuleMap must correspond to a resource or producer key in the system.
+
+#### InputRule
+The `InputRule` object defines the rules for a producer's input consumption of a specific Entity type
+
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| consumptionAmount | Required      | `Number`  | The amount of the input entity to consume (eg 0.1, 1, 2.5 etc) per `consumptionTime` period   |
+| consumptionTime   | Required      | `integer` | The time it takes for the `consumptionAmount` of input entity to be consumed             |
+
 
 
 ### RequirementMap

@@ -74,8 +74,8 @@ export class Producer extends Entity {
                 if (!reqs) return true;
 
                 for (const rc of reqs) {
-                    if ( this.state.consumedInputs[rc.category] && this.state.consumedInputs[rc.category][rc.type] ) {
-                        if (this.state.consumedInputs[rc.category][rc.type].amount < rc.amount) {
+                    if ( this.state.consumedInputs[rc.category] && this.state.consumedInputs[rc.category][rc.key] ) {
+                        if (this.state.consumedInputs[rc.category][rc.key].amount < rc.amount) {
                             return false;
                         }
                     } else {
@@ -89,7 +89,7 @@ export class Producer extends Entity {
                 if (!reqs) return count;
 
                 for (const rc of reqs) {
-                    let maxConsumable = Math.min(count*rc.amount, this.state.consumedInputs[rc.category][rc.type].amount);
+                    let maxConsumable = Math.min(count*rc.amount, this.state.consumedInputs[rc.category][rc.key].amount);
                     if ( maxConsumable >= rc.amount ) {
                         count = Math.min(count, maxConsumable/rc.amount);
                     }
@@ -102,7 +102,7 @@ export class Producer extends Entity {
                 if (!reqs) return;
 
                 for (const rc of reqs) {
-                    this.state.consumedInputs[rc.category][rc.type].amount -= count*rc.amount;
+                    this.state.consumedInputs[rc.category][rc.key].amount -= count*rc.amount;
                 }
             }
 
