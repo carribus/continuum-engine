@@ -1,4 +1,3 @@
-import { Entity } from "./entity.js";
 import { formatScientificNumber } from "./formatters/number_scientific.js";
 import { formatDictionaryNumber } from "./formatters/number_dictionary.js";
 import { formatAbstractNumber } from "./formatters/number_abstract.js";
@@ -23,7 +22,6 @@ export class IncrementalEngine {
         this.resources = {};
         this.modifiers = {};
         this.activeModifiers = [];
-        this.entities = {};
         this.numberFormatter = formatDictionaryNumber;
         this.autosavePeriod = 0;
     }
@@ -64,6 +62,7 @@ export class IncrementalEngine {
         if (!opts) throw "No modifier options provided";
         if (!opts.key) throw `Invalid modifier type value provider ${opts.key}`;
         if (!this.modifiers[opts.key]) {
+            opts.engine = this;
             this.modifiers[opts.key] = new Modifier(opts);
         }
         return this.modifiers[opts.key];
@@ -105,7 +104,7 @@ export class IncrementalEngine {
             if (dt - this.lastTick > 50 ) {
                 this.processProducers(dt);
                 this.processResources(dt);
-                this.processEntities(dt);
+                // this.processEntities(dt);
                 this.processModifiers(dt);
                 // store the last tick that we did processing on
                 this.lastTick = dt;
@@ -119,6 +118,17 @@ export class IncrementalEngine {
     autoSave(dt) {
         if (!this.autosavePeriod) return;
 
+        if (this.lastSave) {
+            if (dt - this.lastSave > this.autosavePeriod) {
+                this.saveState();
+                this.lastSave = dt;
+            }
+        } else {
+            this.lastSave = dt;
+        }
+    }
+
+    saveState() {
         const serialiseObject = (o) => {
             const result = {};
             for (const prop in o) {
@@ -127,24 +137,16 @@ export class IncrementalEngine {
             return result;
         }
 
-        if (this.lastSave) {
-            if (dt - this.lastSave > this.autosavePeriod) {
-                // console.log('Auto-save...');
-                const state = {
-                    lastTick: 0, //this.lastTick,
-                    lastSave: 0, //this.lastSave,
-                    currencies: serialiseObject(this.currencies),
-                    producers: serialiseObject(this.producers),
-                    resources: serialiseObject(this.resources),
-                    numberFormatter: this.numberFormatter,
-                    autosavePeriod: this.autosavePeriod
-                }
-                window.localStorage.setItem('state', JSON.stringify(state));
-                this.lastSave = dt;
-            }
-        } else {
-            this.lastSave = dt;
+        const state = {
+            lastTick: 0, //this.lastTick,
+            lastSave: 0, //this.lastSave,
+            currencies: serialiseObject(this.currencies),
+            producers: serialiseObject(this.producers),
+            resources: serialiseObject(this.resources),
+            numberFormatter: this.numberFormatter,
+            autosavePeriod: this.autosavePeriod
         }
+        window.localStorage.setItem('state', JSON.stringify(state));
     }
 
     loadState() {
@@ -188,7 +190,7 @@ export class IncrementalEngine {
         let producer;
         for (const key in this.producers) {
             producer = this.producers[key];
-            producer.processTick(dt);
+            producer.onTick(dt);
         }
     }
 
@@ -196,7 +198,7 @@ export class IncrementalEngine {
         let resource;
         for (const key in this.resources) {
             resource = this.resources[key];
-            resource.processTick(dt);
+            resource.onTick(dt);
         }
     }
 
@@ -222,7 +224,7 @@ export class IncrementalEngine {
         let entity;
         for (let entName in this.entities) {
             entity = this.entities[entName]
-            entity.processTick(dt);
+            entity.onTick(dt);
         }
     }
 

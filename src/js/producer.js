@@ -1,30 +1,17 @@
-export class Producer {
+import { Entity } from "./entity.js";
+
+export class Producer extends Entity {
     constructor(opts) {
-        this.state = {
-            key: opts.key,
-            baseCost: opts.baseCost,
-            costCoefficient: opts.costCoefficient,
-            count: opts.count || 0,
-            maxCount: opts.maxCount,
-            consumedInputs: {},
-        }
+        super("producer", opts);
+        this.state.baseCost = opts.baseCost;
+        this.state.costCoefficient = opts.costCoefficient;
+        this.state.consumedInputs = {};
         this.inputs = opts.inputs || {};
         this.outputs = opts.outputs || { resources: {}, producers: {} };
+        this.hooks = {};
         this.postProcessors = opts.postProcessors;
 
         this.engine = opts.engine;
-    }
-
-    serialise() {
-        return this.state;
-    }
-
-    deserialise(o) {
-        this.state = o;
-    }
-
-    get key() {
-        return this.state.key;
     }
 
     get baseCost() {
@@ -35,27 +22,8 @@ export class Producer {
         return this.state.costCoefficient;
     }
 
-    get count() {
-        return this.state.count;
-    }
-
-    set count(v) {
-        this.state.count = v;
-    }
-
-    get maxCount() {
-        return this.state.maxCount;
-    }
-
     get consumedInputs() {
         return this.state.consumedInputs;
-    }
-
-    setCustomProcessor(processFunc) {
-        if (processFunc === null || processFunc && typeof processFunc == "function") {
-            this.customProcessor = processFunc;
-        }
-        return this;
     }
 
     calculateCost(count) {
@@ -72,7 +40,6 @@ export class Producer {
         const result = this.state.consumedInputs;
 
         const processInputs = () => {
-            if (this.state.count <= 0) return;
             // loop through the input categories
             Object.keys(this.inputs).map((cat) => {
                 Object.keys(this.inputs[cat]).map((input) => {

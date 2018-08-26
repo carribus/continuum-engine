@@ -1,22 +1,41 @@
-export class Currency {
+import { EventEmitter } from "./eventemitter.js";
+
+export class Currency extends EventEmitter {
     constructor(type, initialValue) {
-        this.type = type;
-        this.value = initialValue;
+        super();
+        this.state = {
+            type: type,
+            value: initialValue
+        }
+    }
+
+    get value() {
+        return this.state.value;
+    }
+
+    get type() {
+        return this.state.type;
+    }
+
+    set value(v) {
+        this.state.value = v;
     }
 
     serialise() {
-        return {
-            type: this.type,
-            value: this.value
-        };
+        return this.state;
     }
 
     deserialise(o) {
-        this.type = o.type;
-        this.value = o.value;
+        this.state = o;
     }
 
     incrementBy(value) {
         this.value += value;
+        this.emit("CURRENCY_UPDATED", {
+            obj: this,
+            type: this.state.type,
+            value: this.state.value,
+            delta: value
+        });
     }
 }
