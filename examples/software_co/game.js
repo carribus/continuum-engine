@@ -1,4 +1,4 @@
-import { ContinuumEngine } from './engine.js';
+import { ContinuumEngine } from '/src/js/engine.js';
 
 const statusDiv = document.getElementById("content");
 let buttons = {}
@@ -10,14 +10,13 @@ window.onload = function() {
     createProducers();
     createResources();
     createModifiers();
-    // createEntities();
 
-    // engine.loadState();
+    engine.loadState();
     engine.autosavePeriod = 1000;   // save every second
 
     connectUItoHandlers();
 
-    console.log("%cIncremental Engine loaded and initialised", "color: blue");
+    console.log("%cGame loaded and initialised", "color: blue");
 
     window.addEventListener("beforeunload", (e) => {
         // persist game state at this point
@@ -208,23 +207,6 @@ function createModifiers() {
             }
         }
     })
-}
-
-function createEntities() {
-    engine.createEntity("Source Code", 1000, 1).setCustomProcessor(function(dt) {
-        let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
-        this.count += incrementBy;
-        this.engine.currency("gold").incrementBy(this.incrementBy);
-    });
-    engine.createEntity("Graphics", 0, 1);
-    engine.createEntity("Sound", 0, 1);
-    engine.createEntity("Text", 0, 1);
-    engine.createEntity("Translations", 0, 0.1)
-        .setCustomProcessor(function (dt) {
-        let incrementBy = (this.incrementBy * Math.trunc((dt-this.lastProcessed)/this.incrementAfter));
-        this.count += incrementBy;
-        if (this.count > this.maxCount) this.count = this.maxCount;
-    });
 }
 
 function updateUI() {

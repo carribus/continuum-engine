@@ -14,7 +14,7 @@ const NUMBER_FORMATTERS = {
 
 export class ContinuumEngine {
     constructor() {
-        console.log("ContinuumEngine constructing");
+        console.log("Continuum Engine constructing");
         this.lastTick = 0;
         this.lastSave = 0;
         this.currencies = {};
@@ -68,18 +68,9 @@ export class ContinuumEngine {
         return this.modifiers[opts.key];
     }
 
-    createEntity(key, incrementAfter, incrementBy, startingCount, maxCount) {
-        if (!this.entities[key]) {
-            this.entities[key] = new Entity(key, incrementAfter, incrementBy, startingCount, maxCount);
-            this.entities[key].engine = this;
-        }
-        return this.entities[key];
-    }
-
-    // TODO: You need to probably rewrite this. You want to be able to apply the effect of the modifier here
-    //       and for time-limited modifiers, remove the effect of the modifier when the modifier expires
     activateModifier(key, opts) {
         if (this.modifiers[key]) {
+            if ( !this.modifiers[key].applyFunc ) return;
             const modifier = {
                 key: key,
                 expiresAt: opts.timeLeft ? Date.now() + opts.timeLeft : null,
@@ -104,7 +95,6 @@ export class ContinuumEngine {
             if (dt - this.lastTick > 50 ) {
                 this.processProducers(dt);
                 this.processResources(dt);
-                // this.processEntities(dt);
                 this.processModifiers(dt);
                 // store the last tick that we did processing on
                 this.lastTick = dt;
@@ -217,14 +207,6 @@ export class ContinuumEngine {
                 // remove the modifier from the active modifiers list
                 this.activeModifiers.splice(i, 1);
             }
-        }
-    }
-
-    processEntities(dt) {
-        let entity;
-        for (let entName in this.entities) {
-            entity = this.entities[entName]
-            entity.onTick(dt);
         }
     }
 

@@ -13,7 +13,7 @@ export class Entity extends EventEmitter {
         this.requirements = opts.requirements;
         if ( this.requirements ) console.log(this.requirements);
         this.lastProcessed = 0;
-        this.engine = null;
+        this.engine = opts.engine;
     }
 
     get key()               { return this.state.key }

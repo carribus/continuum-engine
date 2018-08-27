@@ -6,7 +6,6 @@ export class Resource extends Entity {
         this.state.basePrice = opts.basePrice;
 
         this.calculated = opts.calculated;
-        this.engine = opts.engine;
     }
 
     get basePrice() {

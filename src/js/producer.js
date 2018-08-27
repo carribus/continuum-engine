@@ -8,9 +8,14 @@ export class Producer extends Entity {
         this.state.consumedInputs = {};
         this.inputs = opts.inputs || {};
         this.outputs = opts.outputs || { resources: {}, producers: {} };
-        this.postProcessors = opts.postProcessors;
+        // set the 'lastProcessed' timestamp to creation time
+        for (const type in this.outputs) {
+            for (const key in this.outputs[type]) {
+                this.outputs[type][key].lastProcessed = Date.now();
+            }
+        }
 
-        this.engine = opts.engine;
+        this.postProcessors = opts.postProcessors;
     }
 
     get baseCost() {
