@@ -1,8 +1,8 @@
-import { IncrementalEngine } from './engine.js';
+import { ContinuumEngine } from './engine.js';
 
 const statusDiv = document.getElementById("content");
 let buttons = {}
-const engine = new IncrementalEngine();
+const engine = new ContinuumEngine();
 
 // start the timer using animation frame
 window.onload = function() {

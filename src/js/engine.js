@@ -12,9 +12,9 @@ const NUMBER_FORMATTERS = {
     "abstract": formatAbstractNumber
 };
 
-export class IncrementalEngine {
+export class ContinuumEngine {
     constructor() {
-        console.log("IncrementalEngine constructing");
+        console.log("ContinuumEngine constructing");
         this.lastTick = 0;
         this.lastSave = 0;
         this.currencies = {};

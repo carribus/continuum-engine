@@ -52,10 +52,26 @@ The `OutputMap` object must contain *at least* one output category (for example,
 
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |
-| resources         | *optional*    | OutputRuleMap | A map of 1 or more output rules (one per resource)            |
-| producers         | *optional*    | OutputRuleMap | A map of 1 or more output rules (one per producer)            |
+| resources         | *optional*    | `OutputRuleMap` | A map of 1 or more output rules (one per resource)            |
+| producers         | *optional*    | `OutputRuleMap` | A map of 1 or more output rules (one per producer)            |
 
 Each property within the `resources` or `producers` OutputRuleMap must correspond to a resource or producer key in the system.
+
+*Example*
+```javascript
+{
+    ...
+    outputs: {
+            resources: {
+                "ResourceExampleKey": {
+                    productionTime: 500,
+                    productionAmount: 0.1
+                }
+            }
+        }    
+    ...
+}
+```
 
 #### OutputRule
 The `OutputRule` object defines the rules for a producer's output of a specific Entity type
@@ -65,6 +81,27 @@ The `OutputRule` object defines the rules for a producer's output of a specific 
 | productionAmount  | Required      | `Number`  | The amount of the output entity to create (eg 0.1, 1, 2.5 etc) per `productionTime` period   |
 | productionTime    | Required      | `integer` | The time it takes for the `productionAmount` of output entity to be created             |
 | inputRequirements | *optional*    | `array[InputRequirement]` | An array of input requirements. This defines the inputs needed to create the entity. Should only be used if the producer has `inputs` specified |
+
+*Example*
+```javascript
+{
+    ...
+        resources: {
+            "Wood Planks": {
+                productionTime: 500,
+                productionAmount: 1,
+                inputRequirements: [
+                    {
+                        category: "resources",
+                        key: "Wood",
+                        amount: 2
+                    }
+                ],
+            }
+        }
+    ...
+}
+```
 
 #### InputRequirement
 
@@ -82,8 +119,8 @@ The `InputMap` object must contain *at least* one output category (for example, 
 
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |
-| resources         | *optional*    | InputRuleMap | A map of 1 or more input rules (one per resource)            |
-| producers         | *optional*    | InputRuleMap | A map of 1 or more input rules (one per producer)            |
+| resources         | *optional*    | `InputRuleMap` | A map of 1 or more input rules (one per resource)            |
+| producers         | *optional*    | `InputRuleMap` | A map of 1 or more input rules (one per producer)            |
 
 Each property within the `resources` or `producers` InputRuleMap must correspond to a resource or producer key in the system.
 
@@ -96,8 +133,82 @@ The `InputRule` object defines the rules for a producer's input consumption of a
 | consumptionTime   | Required      | `integer` | The time it takes for the `consumptionAmount` of input entity to be consumed             |
 
 
-
 ### RequirementMap
+The `RequirementMap` object must contain *at least* one output category (for example, `resources` or `producers`).
 
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| resources         | *optional*    | ``RequirementRuleMap` | A map of 1 or more resource requirement rules (one per resource)            |
+| producers         | *optional*    | `RequirementRuleMap` | A map of 1 or more producer requirement rules (one per producer)            |
+
+*Example*
+```javascript
+{
+    ...
+        requirements: {
+            producers: {
+                "Woodcutter": 10
+            }
+        },
+    ...
+}
+```
+
+#### RequirementRuleMap
+The 'RequirementRuleMap' object defines the minimum requirements that must be met before a producer can be created. For example, before you can create Woodcutter, you need trees for the Woodcutter to chop down.
+
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| {EntityKey}       | Required      | `Number`  | A value the defines the minimum number of this type of Entity that must exist |
+
+### Putting it all together
+
+Lets have a look at a complete example now.. We are going to create a Woodcutter (producer) that outputs Wood (resource). It uses Trees (Resource) as an input and consumes them at a specific rate...
+
+```javascript
+import { ContinuumEngine } from './engine.js';
+
+const engine = new ContinuumEngine();
+
+const WoodCutter = engine.createProducer({
+    key: "woodcutter",
+    requirements: {
+        resources: {
+            "tree": 5                           // We need at least 5 trees before we can create a woodcutter
+        }
+    },
+    baseCost: {                                 // here we define that a woodcutter's base cost is 100 gold (a currency we define elsewhere)
+        currency: "gold",
+        amount: 100
+    },
+    costCoefficient: 1.07,                      // the cost per resource increases by a factor of 1.07
+    count: 0                                    // start off with 0 woodcutters
+    inputs: {
+        resources: {
+            "tree": {
+                consumptionTime: 1000,          // every second (1000ms)...
+                consumptionAmount: 1            // chop down 1 tree as our input
+            }
+        }
+    },
+    outputs: {
+        resources: {
+            "wood": {
+                inputRequirements: [            // to create wood, we use trees as our requirement
+                    {
+                        category: "resources",
+                        key: "tree",
+                        amount: 1               // we need at least 1 tree to create a single production of wood (defined below)
+                    }
+                ],
+                productionTime: 2000,           // every 2 seconds,
+                productionAmount: 4             // we create 4 wood resources
+            }
+        }
+    }
+})
+```
 
 ### PostProcessorMap
+To be written...
+
