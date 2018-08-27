@@ -6,12 +6,15 @@ export class Producer extends Entity {
         this.state.baseCost = opts.baseCost;
         this.state.costCoefficient = opts.costCoefficient;
         this.state.consumedInputs = {};
+        this.state.processingEnabled = (typeof opts.processingEnabled === 'boolean' ? opts.processingEnabled : true);
         this.inputs = opts.inputs || {};
         this.outputs = opts.outputs || { resources: {}, producers: {} };
         // set the 'lastProcessed' timestamp to creation time
-        for (const type in this.outputs) {
-            for (const key in this.outputs[type]) {
-                this.outputs[type][key].lastProcessed = Date.now();
+        if ( this.state.processingEnabled === true ) {
+            for (const type in this.outputs) {
+                for (const key in this.outputs[type]) {
+                    this.outputs[type][key].lastProcessed = Date.now();
+                }
             }
         }
 
@@ -28,6 +31,23 @@ export class Producer extends Entity {
 
     get consumedInputs() {
         return this.state.consumedInputs;
+    }
+
+    get processingEnabled() {
+        return this.state.processingEnabled;
+    }
+
+    set processingEnabled(flag) {
+        if (typeof flag === 'boolean') {
+            if ( flag !== this.state.processingEnabled ) {
+                this.state.processingEnabled = flag;
+                for (const key in this.outputs.resources) {
+                    this.outputs.resources[key].lastProcessed = flag ? Date.now() : null;
+                }
+            }
+        } else {
+            throw `Invalid value ${flag} passed as value to Producer.processingEnabled`;
+        }
     }
 
     calculateCost(count) {
@@ -130,6 +150,11 @@ export class Producer extends Entity {
     
                                         reduceConsumpedInputsBy(clampedCount, rules.inputRequirements);
                                         obj.incrementBy(incrementBy);
+                                        this.emit("PRODUCER_OUTPUT", {
+                                            producer: this,
+                                            output: obj,
+                                            delta: incrementBy
+                                        });
                     
                                         rules.lastProcessed = dt;
                                     };
@@ -156,8 +181,10 @@ export class Producer extends Entity {
             }
         }
 
-        processInputs();
-        processOutputs();
-        runPostProcessors();
+        if (this.state.processingEnabled) {
+            processInputs();
+            processOutputs();
+            runPostProcessors();
+        }
     }
 }

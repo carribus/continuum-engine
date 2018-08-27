@@ -12,7 +12,17 @@ window.onload = function() {
         engine.createResource(ResourceList[res]);
     }
     for (const prod in ProducerList) {
-        engine.createProducer(ProducerList[prod]);
+        const producer = engine.createProducer(ProducerList[prod]);
+        
+        producer.on("PRODUCER_COUNT_UPDATED", (e) => {
+            if (e.obj.count >= 25) {
+                e.obj.processingEnabled = true;
+            }
+        });
+        producer.on("PRODUCER_OUTPUT", (e) => {
+            engine.currencies["gold"].incrementBy(e.output.calculatePrice(e.output.count).amount);
+            e.output.incrementBy(-e.output.count);
+        });
     }
 
     ui.init();

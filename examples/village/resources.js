@@ -1,13 +1,5 @@
 export default
 {
-    tree: {
-        key: "tree",
-        basePrice: {
-            currency: "gold",
-            amount: 0
-        },
-        count: 5
-    },
     wood: {
         key: "wood",
         basePrice: {
@@ -16,12 +8,44 @@ export default
         },
         count: 0
     },
-    plank: {
-        key: "plank",
+    ore: {
+        key: "ore",
         basePrice: {
             currency: "gold",
-            amount: 5
+            amount: 10
         },
         count: 0
-    }
+    },
+    skin: {
+        key: "skin",
+        basePrice: {
+            currency: "gold",
+            amount: 75
+        },
+        count: 0
+    },
+    meat: {
+        key: "meat",
+        basePrice: {
+            currency: "gold",
+            amount: 750
+        },
+        count: 0
+    },
+    furniture: {
+        key: "furniture",
+        basePrice: {
+            currency: "gold",
+            amount: 1750
+        },
+        count: 0
+    },
+    weapon: {
+        key: "weapon",
+        basePrice: {
+            currency: "gold",
+            amount: 4000
+        },
+        count: 0
+    },
 }
