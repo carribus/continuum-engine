@@ -16,6 +16,7 @@ export class Entity extends EventEmitter {
         this.engine = opts.engine;
     }
 
+    get type()              { return this.state.type }
     get key()               { return this.state.key }
     get count()             { return this.state.count }
     get maxCount()          { return this.state.maxCount }

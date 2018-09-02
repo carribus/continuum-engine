@@ -2,12 +2,16 @@ export default class VillageUI {
     constructor(engine) {
         this.engine = engine;
         this.gameElem = document.getElementById("game");
+        this.productionElem = document.getElementById("production");
+        this.managementElem = document.getElementById("management");
         this.currencyElem = document.getElementById("currency");
         this.producerElems = {};
+        this.managerElems = {};
     }
 
     init() {
         this._initProducerElements();
+        this._initManagerElements();
     }
 
     update() {
@@ -20,11 +24,7 @@ export default class VillageUI {
             const producer = this.engine.producers[key];
 
             prod.title.innerHTML = `${key}<br/>(${producer.count})`;
-            if (producer.count <= 0 ) {
-                prod.title.classList.add("disabled")
-            } else {
-                prod.title.classList.remove("disabled")
-            }
+            prod.title.disabled = producer.count <= 0 ? true : false;
 
             for ( const out of prod.outputs ) {
                 const resource = this.engine.resources[out.key];
@@ -34,7 +34,7 @@ export default class VillageUI {
                 if (!Number.isNaN(outputValue)) {
                     let text = `${this.engine.formatNumber(outputValue)} ${resource.basePrice.currency}`
 
-                    if ( producer.processingEnabled ) {
+                    if ( producer.processingEnabled && producer.count > 0 ) {
                         text = `[${progressPerc}%] -> ${text}`;
                     }
 
@@ -45,6 +45,11 @@ export default class VillageUI {
             const cost = producer.calculateCost(1);
             prod.buy.innerHTML = `Buy x 1 - G ${this.engine.formatNumber(cost)}`;
             prod.buy.disabled = this.engine.currencies.gold.value - cost < 0;
+        }
+
+        for (const key in this.managerElems) {
+            const manager = this.managerElems[key].title.managerObj;
+            this.managerElems[key].title.disabled = manager.count > 0 ? true : false;
         }
     }
 
@@ -65,7 +70,7 @@ export default class VillageUI {
             p.className = "producer";
 
             // Title
-            let pTitle = document.createElement("div");
+            let pTitle = document.createElement("button");
             pTitle.className = "title";
             pTitle.producerObj = producer;
             pTitle.innerHTML = `${key}<br/>(${producer.count})`;
@@ -73,13 +78,7 @@ export default class VillageUI {
             this.producerElems[key].title = pTitle;
             pTitle.addEventListener("click", (e) => {
                 const producer = e.target.producerObj;
-                if (producer.count && !producer.processingEnabled) {
-                    const removeListener = producer.on("PRODUCER_OUTPUT", (e) => {
-                        e.producer.processingEnabled = false;
-                        // this.engine.currencies["gold"].incrementBy(e.output.calculatePrice(e.output.count).amount);
-                        // e.output.incrementBy(-e.output.count);
-                        removeListener();
-                    });
+                if (producer.count) {
                     producer.processingEnabled = true;
                 }
             });
@@ -109,7 +108,37 @@ export default class VillageUI {
             p.appendChild(pButton);
             this.producerElems[key].buy = pButton;
 
-            this.gameElem.appendChild(p);
+            this.productionElem.appendChild(p);
+        }
+    }
+
+    _initManagerElements() {
+        for (const manager of this.engine.managers) {
+            let p = document.createElement("div");
+            p.className = "manager";
+
+            this.managerElems[manager.key] = { block: p, title: null };
+
+            // Title
+            let pTitle = document.createElement("button");
+            pTitle.className = "title";
+            pTitle.managerObj = manager;
+            pTitle.innerHTML = `${manager.key}<br/>(${this.engine.formatNumber(manager.basePrice.amount)} ${manager.basePrice.currency})`;
+            p.appendChild(pTitle);
+            this.managerElems[manager.key].title = pTitle;
+            pTitle.addEventListener("click", (e) => {
+                const manager = e.target.managerObj;
+                const currency = this.engine.currency(manager.basePrice.currency);
+
+                if (manager.count <= 0) {
+                    if ( manager.purchase(currency) ) {
+                        this.managerElems[manager.key].block.classList.add('hidden');
+                    }
+                }
+            });
+
+            this.managementElem.appendChild(p);
+            
         }
     }
 }

@@ -4,7 +4,7 @@ export default
         key: "wood",
         basePrice: {
             currency: "gold",
-            amount: 1
+            amount: 2
         },
         count: 0
     },
