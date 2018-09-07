@@ -5,7 +5,7 @@ export default
         producer: "Lumberjack",
         basePrice: {
             currency: "gold",
-            amount: 5
+            amount: 500
         },
         count: 0
     },
@@ -47,7 +47,7 @@ export default
     },
     BlacksmithMgr: {
         key: "Blacksmith Manager",
-        producer: "Blacksmit",
+        producer: "Blacksmith",
         basePrice: {
             currency: "gold",
             amount: 100000
