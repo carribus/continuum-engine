@@ -1,4 +1,4 @@
-export class Modifier {
+export default class Modifier {
     constructor(opts) {
         this.state = {
             key: opts.key

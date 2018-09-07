@@ -113,7 +113,9 @@ export default class VillageUI {
     }
 
     _initManagerElements() {
-        for (const manager of this.engine.managers) {
+        for (const key in this.engine.reactors) {
+            const manager = this.engine.reactor(key);
+            if (manager.uiShouldIgnore) continue;
             let p = document.createElement("div");
             p.className = "manager";
 

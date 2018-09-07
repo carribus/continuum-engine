@@ -1,6 +1,6 @@
-import { EventEmitter } from "./eventemitter.js";
+import EventEmitter from "./eventemitter.js";
 
-export class Currency extends EventEmitter {
+export default class Currency extends EventEmitter {
     constructor(type, initialValue) {
         super();
         this.state = {

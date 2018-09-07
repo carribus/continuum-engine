@@ -1,10 +1,11 @@
-import { formatScientificNumber } from "./formatters/number_scientific.js";
-import { formatDictionaryNumber } from "./formatters/number_dictionary.js";
-import { formatAbstractNumber } from "./formatters/number_abstract.js";
-import { Currency } from "./currency.js";
-import { Producer } from "./producer.js";
-import { Resource } from "./resource.js";
-import { Modifier } from "./modifier.js";
+import formatScientificNumber from "./formatters/number_scientific.js";
+import formatDictionaryNumber from "./formatters/number_dictionary.js";
+import formatAbstractNumber from "./formatters/number_abstract.js";
+import Currency from "./currency.js";
+import Producer from "./producer.js";
+import Resource from "./resource.js";
+import Modifier from "./modifier.js";
+import Reactor from "./reactor.js";
 
 const NUMBER_FORMATTERS = {
     "scientific": formatScientificNumber,
@@ -21,6 +22,7 @@ export class ContinuumEngine {
         this.producers = {};
         this.resources = {};
         this.modifiers = {};
+        this.reactors = {};
         this.activeModifiers = [];
         this.numberFormatter = formatDictionaryNumber;
         this.autosavePeriod = 0;
@@ -40,7 +42,7 @@ export class ContinuumEngine {
 
     createProducer(opts) {
         if ( !opts ) throw "No producer options provided";
-        if ( !opts.key ) throw `Invalid producer type value provided ${opts.type}`;
+        if ( !opts.key ) throw `Invalid producer .key value provided ${opts.type}`;
         if (!this.producers[opts.key]) {
             opts.engine = this;
             this.producers[opts.key] = new Producer(opts);
@@ -48,9 +50,13 @@ export class ContinuumEngine {
         return this.producers[opts.key];
     }
 
+    producer(key) {
+        return this.producers[key];
+    }
+
     createResource(opts) {
         if ( !opts ) throw "No resource options provided";
-        if ( !opts.key ) throw `Invalid resource type value provided ${opts.key}`;
+        if ( !opts.key ) throw `Invalid resource .key value provided ${opts.key}`;
         if (!this.resources[opts.key]) {
             opts.engine = this;
             this.resources[opts.key] = new Resource(opts);
@@ -58,14 +64,36 @@ export class ContinuumEngine {
         return this.resources[opts.key];
     }
 
+    resource(key) {
+        return this.resources[key];
+    }
+
     createModifier(opts) {
         if (!opts) throw "No modifier options provided";
-        if (!opts.key) throw `Invalid modifier type value provider ${opts.key}`;
+        if (!opts.key) throw `Invalid modifier .key value provided ${opts.key}`;
         if (!this.modifiers[opts.key]) {
             opts.engine = this;
             this.modifiers[opts.key] = new Modifier(opts);
         }
         return this.modifiers[opts.key];
+    }
+
+    modifier(key) {
+        return this.modifiers[key];
+    }
+
+    createReactor(opts) {
+        if (!opts) throw "No reactor options provided";
+        if (!opts.key) throw `Invalid reactor .key value provided ${opts.key}`;
+        if (!this.reactors[opts.key]) {
+            opts.engine = this;
+            this.reactors[opts.key] = new Reactor(opts);
+        }
+        return this.reactors[opts.key];
+    }
+
+    reactor(key) {
+        return this.reactors[key];
     }
 
     activateModifier(key, opts) {
@@ -133,6 +161,7 @@ export class ContinuumEngine {
             currencies: serialiseObject(this.currencies),
             producers: serialiseObject(this.producers),
             resources: serialiseObject(this.resources),
+            reactors: serialiseObject(this.reactors),
             numberFormatter: this.numberFormatter,
             autosavePeriod: this.autosavePeriod
         }

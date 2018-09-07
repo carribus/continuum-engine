@@ -1,6 +1,6 @@
 const postfixes = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-export function formatAbstractNumber(val) {
+export default function formatAbstractNumber(val) {
     const components = val.toExponential(2).split("e");
     const roundValTo = (val, roundTo) => { return Math.floor(val/roundTo)*roundTo };
     const getPostFix = (exp) => { return postfixes[Math.floor(exp/3)] };

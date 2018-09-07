@@ -1,6 +1,6 @@
-import { Entity } from "./entity.js";
+import Entity from "./entity.js";
 
-export class Producer extends Entity {
+export default class Producer extends Entity {
     constructor(opts) {
         super("producer", opts);
         this.state.baseCost = opts.baseCost;

@@ -1,6 +1,6 @@
-import { EventEmitter } from "./eventemitter.js";
+import EventEmitter from "./eventemitter.js";
 
-export class Entity extends EventEmitter {
+export default class Entity extends EventEmitter {
     constructor(type, opts) {
         super();
 
