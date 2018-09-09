@@ -1,0 +1,26 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    background-color: black;
+}
+
+.header {
+    padding-left: 5px;
+    padding-bottom: 5px;
+    width: 100%;
+    background-color: coral;
+    vertical-align: middle;
+    font-size: 32px;
+}
+
+.subscript {
+    padding-left: 5px;
+    margin-top: -10px;
+    font-size: 14px;
+    font-style: italic;
+    vertical-align: top
+}
