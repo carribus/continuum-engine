@@ -60,6 +60,21 @@ export default class VillageUI {
     //
     // PRIVATE METHODS
     _initProducerElements() {
+        const onBuyButtonPressed = (e) => {
+            const producer = e.target.producerObj;
+            const cost = producer.calculateCost(1);
+            if (this.engine.currencies.gold.value - cost >= 0) {
+                producer.incrementBy(1);
+                this.engine.currencies.gold.incrementBy(-cost);
+            }
+        };
+
+        const onStartProcessingButtonPressed = (e) => {
+            const producer = e.target.producerObj;
+            if (producer.count) {
+                producer.processingEnabled = true;
+            }
+        }
 
         for (const key in this.engine.producers) {
             const producer = this.engine.producers[key];
@@ -76,12 +91,8 @@ export default class VillageUI {
             pTitle.innerHTML = `${key}<br/>(${producer.count})`;
             p.appendChild(pTitle);
             this.producerElems[key].title = pTitle;
-            pTitle.addEventListener("click", (e) => {
-                const producer = e.target.producerObj;
-                if (producer.count) {
-                    producer.processingEnabled = true;
-                }
-            });
+            pTitle.addEventListener("touchstart", onStartProcessingButtonPressed);
+            pTitle.addEventListener("click", onStartProcessingButtonPressed);
 
             for (const o in producer.outputs.resources) {
                 const out = producer.outputs.resources[o];
@@ -97,14 +108,8 @@ export default class VillageUI {
             pButton.className = "button";
             pButton.innerHTML = `Buy x 1 - G ${this.engine.formatNumber(this.engine.producers[key].calculateCost(1))}`;
             pButton.producerObj = this.engine.producers[key];
-            pButton.addEventListener("click", (e) => {
-                const producer = e.target.producerObj;
-                const cost = producer.calculateCost(1);
-                if (this.engine.currencies.gold.value - cost >= 0) {
-                    producer.incrementBy(1);
-                    this.engine.currencies.gold.incrementBy(-cost);
-                }
-            });
+            pButton.addEventListener("touchstart", onBuyButtonPressed);
+            pButton.addEventListener("click", onBuyButtonPressed);
             p.appendChild(pButton);
             this.producerElems[key].buy = pButton;
 

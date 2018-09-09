@@ -79,6 +79,7 @@ div#production, div#management {
     background-color: darkolivegreen;
     color: white;
     font-size: 12px;
+    cursor: pointer;
 }
 
 .disabled {
@@ -110,4 +111,5 @@ button:disabled {
     background-color: teal;
     color: white;
     font-size: 20px;
+    cursor: pointer;
 }
