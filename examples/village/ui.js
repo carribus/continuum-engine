@@ -67,6 +67,7 @@ export default class VillageUI {
                 producer.incrementBy(1);
                 this.engine.currencies.gold.incrementBy(-cost);
             }
+            e.preventDefault();
         };
 
         const onStartProcessingButtonPressed = (e) => {
@@ -74,6 +75,7 @@ export default class VillageUI {
             if (producer.count) {
                 producer.processingEnabled = true;
             }
+            e.preventDefault();
         }
 
         for (const key in this.engine.producers) {
@@ -118,6 +120,18 @@ export default class VillageUI {
     }
 
     _initManagerElements() {
+        const onBuyManagerPressed = (e) => {
+            const manager = e.target.managerObj;
+            const currency = this.engine.currency(manager.basePrice.currency);
+
+            if (manager.count <= 0) {
+                if (manager.purchase(currency)) {
+                    this.managerElems[manager.key].block.classList.add('hidden');
+                }
+            }
+            e.preventDefault();
+        };
+
         for (const key in this.engine.reactors) {
             const manager = this.engine.reactor(key);
             if (manager.uiShouldIgnore) continue;
@@ -133,16 +147,8 @@ export default class VillageUI {
             pTitle.innerHTML = `${manager.key}<br/>(${this.engine.formatNumber(manager.basePrice.amount)} ${manager.basePrice.currency})`;
             p.appendChild(pTitle);
             this.managerElems[manager.key].title = pTitle;
-            pTitle.addEventListener("click", (e) => {
-                const manager = e.target.managerObj;
-                const currency = this.engine.currency(manager.basePrice.currency);
-
-                if (manager.count <= 0) {
-                    if ( manager.purchase(currency) ) {
-                        this.managerElems[manager.key].block.classList.add('hidden');
-                    }
-                }
-            });
+            pTitle.addEventListener("click", onBuyManagerPressed);
+            pTitle.addEventListener("touchstart", onBuyManagerPressed);
 
             this.managementElem.appendChild(p);
             
