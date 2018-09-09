@@ -6,11 +6,11 @@ import Enemy, { ENEMY_STATE } from "./enemy.js";
 import LootTable from "./loottable.js";
 
 const DISCOVERY_ITEM_TABLE = {
-    BERSERKER_PLANT: { label: "Berseker Plant", type: Symbol("berserker"), probability: 5 },
+    BERSERKER_PLANT: { label: "Berseker Plant", type: Symbol("berserker"), probability: 2 },
     XP_LEAF: { label: "Experience Leaf", type: Symbol("xpleaf"), probability: 5 },
-    IRON_SHROOM: { label: "Iron Mushroom", type: Symbol("ironshroom"), probability: 10 },
-    EAGLEEYE_SEED: { label: "Eagle Eye Seed", type: Symbol("eagleeye"), probability: 2 },
-    NOTHING: { label: "nothing", type: Symbol("nothing"), probability: 73 },
+    IRON_SHROOM: { label: "Iron Mushroom", type: Symbol("ironshroom"), probability: 2 },
+    EAGLEEYE_SEED: { label: "Eagle Eye Seed", type: Symbol("eagleeye"), probability: 1 },
+    NOTHING: { label: "nothing", type: Symbol("nothing"), probability: 70 },
 }
 
 export default class Game {
@@ -32,7 +32,7 @@ export default class Game {
         this.enemy = null;
 
         this.gameStateTable = new LootTable([
-            { type: "encounter", probability: 7 },
+            { type: "encounter", probability: 3 },
             { type: "discover", probability: 15 },
             { type: "noAction", probability: 90 },
         ]);
@@ -202,9 +202,9 @@ export default class Game {
         this.enemy.level = this.hero.level;
         this.enemy.health = Math.floor(this.hero.maxHealth * (1 + Math.random() * 0.5));
         this.enemy.atk = this.hero.atk;
-        this.enemy.def = Math.floor(Math.random() * this.hero.def);
+        this.enemy.def = this.hero.def-1 + Math.floor(Math.random() * this.enemy.level);
         this.enemy.cri = this.hero.cri;
-        this.enemy.speed = this.hero.speed * (0.85 + Math.random()*0.5);
+        this.enemy.speed = this.hero.speed;
         this.enemy.xpValue = Math.max(1, Math.floor(this.enemy.level/2));
 
         this.enemy.on("ENEMY_DAMAGE", this.onEnemyDamage.bind(this));
