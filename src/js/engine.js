@@ -13,7 +13,7 @@ const NUMBER_FORMATTERS = {
     "abstract": formatAbstractNumber
 };
 
-export class ContinuumEngine {
+export default class ContinuumEngine {
     constructor() {
         console.log("Continuum Engine constructing");
         this.lastTick = 0;
@@ -48,6 +48,12 @@ export class ContinuumEngine {
             this.producers[opts.key] = new Producer(opts);
         }
         return this.producers[opts.key];
+    }
+
+    destroyProducer(key) {
+        if (this.producers[key]) {
+            delete this.producers[key];
+        }
     }
 
     producer(key) {

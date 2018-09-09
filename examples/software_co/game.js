@@ -1,4 +1,4 @@
-import { ContinuumEngine } from '/src/js/engine.js';
+import ContinuumEngine from '/src/js/engine.js';
 
 const statusDiv = document.getElementById("content");
 let buttons = {}

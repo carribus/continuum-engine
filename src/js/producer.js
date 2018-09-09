@@ -59,6 +59,24 @@ export default class Producer extends Entity {
         return cost;
     }
 
+    addOutput(outputType, outputKey, productionTime, productionAmount) {
+        outputType += 's';
+        this.outputs[outputType] == this.outputs[outputType] || {};
+        this.outputs[outputType][outputKey] = this.outputs[outputType][outputKey] || {};
+        this.outputs[outputType][outputKey].productionTime = productionTime;
+        this.outputs[outputType][outputKey].productionAmount = productionAmount;
+
+        return this;
+    }
+
+    getOutput(outputType, outputKey) {
+        let result = null;
+        if (this.outputs[outputType]) {
+            result = this.outputs[outputType][outputKey];
+        }
+        return result;
+    }
+
     processTick(dt) {
         let lastProcessed, rules, obj;
         const result = this.state.consumedInputs;
@@ -160,7 +178,7 @@ export default class Producer extends Entity {
                                     };
                                 }
                             } else {
-                                throw `Output object not found:\n\tType: ${cat}\n\tKey: ${input}`
+                                throw `Output object not found:\n\tType: ${cat}\n\tKey: ${output}`
                             }
                         } else {
                             rules.lastProcessed = dt;

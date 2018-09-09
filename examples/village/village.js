@@ -1,4 +1,4 @@
-import { ContinuumEngine } from "/src/js/engine.js"
+import ContinuumEngine from "/src/js/engine.js"
 import VillageUI from "./ui.js"
 import ResourceList from "./resources.js"
 import ProducerList from "./producers.js"

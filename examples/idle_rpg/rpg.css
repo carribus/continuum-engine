@@ -1,0 +1,98 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    background-color: black;
+}
+
+.header {
+    padding-left: 5px;
+    padding-bottom: 5px;
+    width: 100%;
+    background-color: #9090ff;
+    vertical-align: middle;
+    font-size: 32px;
+}
+
+div#hero {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.herostat {
+    flex-grow: 1;
+    padding: 5 5 5 5;
+    color: coral;
+    border: solid 1px coral;
+    font-size: 22;
+    width: 200;
+}
+
+div#stats {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.stat {
+    flex-grow: 1;
+    padding: 5 5 5 5;
+    color: lightblue;
+    border: solid 1px lightblue;
+    font-size: 18;
+    width: 200;
+}
+
+#game {
+    font-size: 14;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.subscript {
+    padding-left: 5px;
+    margin-top: -10px;
+    font-size: 14px;
+    font-style: italic;
+    vertical-align: top
+}
+
+.logitem_hero {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: lightgreen;
+}
+
+.logitem_enemy {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: red;
+}
+
+.logitem_notice {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 16;
+    background-color: purple;
+    color: white;
+}
+
+.logitem_info {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 16;
+    background-color: white;
+    color: black;
+}
+
+.logitem_warning {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 16;
+    background-color: red;
+    color: white;
+}
