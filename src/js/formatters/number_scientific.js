@@ -1,3 +1,3 @@
-export default function formatScientificNumber(val) {
-    return val.toExponential(2);
+export default function formatScientificNumber(val, decimals) {
+    return val.toExponential(decimals);
 }

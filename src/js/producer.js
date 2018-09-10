@@ -4,7 +4,7 @@ export default class Producer extends Entity {
     constructor(opts) {
         super("producer", opts);
         this.state.baseCost = opts.baseCost;
-        this.state.costCoefficient = opts.costCoefficient;
+        this.state.costCoefficient = opts.costCoefficient || 1;
         this.state.consumedInputs = {};
         this.state.processingEnabled = (typeof opts.processingEnabled === 'boolean' ? opts.processingEnabled : true);
         this.inputs = opts.inputs || {};
@@ -50,11 +50,14 @@ export default class Producer extends Entity {
         }
     }
 
+    // TODO: Modify this method to return the cost as a currency object instead of just a unqualified value
     calculateCost(count) {
         let cost = 0;
 
-        for (let i = 0; i < count; i++) {
-            cost += Math.round(this.state.baseCost.amount * Math.pow(this.state.costCoefficient, this.state.count+i));
+        if (this.state.baseCost) {
+            for (let i = 0; i < count; i++) {
+                cost += Math.round(this.state.baseCost.amount * Math.pow(this.state.costCoefficient, this.state.count + i));
+            }
         }
         return cost;
     }

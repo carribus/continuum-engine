@@ -4,11 +4,11 @@ let game;
 
 window.onload = function () {
     game = new Game();
-    window.requestAnimationFrame(onTick);
+    gameLoop();
 };
 
-function onTick(dt) {
-    // game.onTick(dt);
-    window.requestAnimationFrame(onTick);
+function gameLoop(dt) {
+    game.onTick(Date.now());
+    window.requestAnimationFrame(gameLoop);
 }
 

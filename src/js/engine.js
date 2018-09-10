@@ -256,8 +256,8 @@ export default class ContinuumEngine {
         }
     }
 
-    formatNumber(n) {
-        return this.numberFormatter(n);
+    formatNumber(n, decimals = 2) {
+        return this.numberFormatter(n, decimals);
     }
 }
 

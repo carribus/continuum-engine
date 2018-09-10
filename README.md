@@ -24,11 +24,64 @@ Producers can have a cost associated with them, along with a co-efficient. If a 
 #### Resources
 
 As mentioned in the Producer's description above, a Resource is a thing that is created (or consumed) by a Producer (generally speaking). Resources generate events when their 'count' changes that other parts of your code can subscribe to and react are you need. 
-ˀ
+
 ### Currencies
 
 The engine also supports the concept of currencies. You can create as many (or as few) currencies as you wish. Currencies are interesting because they can be used to set 'purchase costs' for Producers and 'sell prices' for Resources. 
 
+## Resource definition
+
+To create a resource, you call the `engine.createresource(defObj)` method and pass in an object which contains one or more of the following properties:
+
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| key               | Required      | `string`  | (Inherited from Entity) The identifier for the Resource entity                            |
+| basePrice         | Required      | `Currency`| The price for the resource (expressed in units of a specific currency |
+| calculated        | *optional*    | `CalcDefObj`| If present, this function is called to calculate the current 'count' value based on other entities |
+| count             | *optional*    | `integer` | (Inherited from Entity) The starting number of resources of this type |
+| maxCount          | *optional*    | `integer` | (Inherited from Entity) Maximum number of resources of this type that are allowed |
+| requirements      | *optional*    | `RequirementMap` | (Inherited from Entity) A structure of requirements that the producer needs to be satisfied before |it can be created |
+
+*Example*
+```javascript
+engine.createResource({
+    key: "Wood",
+    basePrice: {
+        currency: "gold",
+        amount: 10
+    },
+    count: 0
+})
+```
+
+### CalcDefObj
+
+The `CalcDefObj` object of a `Resource` definition allows you to specify a calculation function for the Resource's count property.
+
+| Property          | Required?     | Type      | Description                                                       |
+| -----------       | -----------   | ------    | ----------------------------------------------------------------  |
+| source            | Required      | `EntityRefObj` | The source Entity on which the calculation will be based                       |
+| calcFunc          | Required      | `function`| The function that is called when the count of a Resource requires recalculation (usually each **tick**) |
+
+*Example*
+```javascript
+// This creates a resource called 'Bugs' which derives its 'count' value based on the amount of 'Source Code' resource which exists.
+// It is assumed that the 'Source Code' resource exists. If it does, the count of Bugs resource will equal 0.1 x [Source Code].count at all times
+// NOTE: The resource.count property of a calculated Resource is updated automatically once the 'calcFunc' returns
+engine.createResource({
+    key: "Bugs",
+    calculated: {
+        source: {
+            type: "resource",
+            key: "Source Code"
+        },
+        calcFunc: function(source) {
+            return source.count * 0.1;
+        }
+    }
+    count: 0
+})
+```
 
 ## Producer definition
 
@@ -39,8 +92,8 @@ To create a producer, you call the `engine.createProducer(defObj)` method and pa
 | key               | Required      | `string`  | The identifier for the Producer entity                            |
 | count             | *optional*    | `integer` | (Inherited from Entity) The starting number of producers         |
 | maxCount          | *optional*    | `integer` | (Inherited from Entity) Maximum number of producers that are allowed |
-| baseCost          | Required      | `Currency`| The base cost for the first producer.                             |
-| costCoefficient   | Required      | `Number`  | The cost co-efficient to be used for scaling the cost. For example: 1.07 |
+| baseCost          | *optional*    | `Currency`| The base cost for the first producer.                             |
+| costCoefficient   | *optional*    | `Number`  | The cost co-efficient to be used for scaling the cost. For example: 1.07 |
 | outputs           | Required      | `OutputMap` | A structure of outputs that the producer will produce        |
 | inputs            | *optional*    | `InputMap` | A structure of inputs that the producer will consume for its outputs |
 | requirements      | *optional*    | `RequirementMap` | (Inherited from Entity) A structure of requirements that the producer needs to be satisfied before |it can be created |
