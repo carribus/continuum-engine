@@ -4,7 +4,16 @@ The Continuum Engine is a game engine built in Javascript to help power the crea
 
 Currently the engine is in very early-stage development, so if you stumble upon this repo, you should probably move along since there's not much to talk about here yet :)
 
-## How it works
+## Examples
+
+I always recommend starting with the examples to see how the engine can be used. The examples can be found in the `examples/` folder.
+
+### Running the examples:
+
+1. You need a web-server. I suggest installed [http-server](https://www.npmjs.com/package/http-server)
+2. Once you have the server, simply type: `http-server .` (don't forget the trailing .)
+
+## How Continuum Engine works
 
 ### Entities:
 
