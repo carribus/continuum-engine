@@ -8,7 +8,7 @@ window.onload = function () {
 };
 
 function gameLoop(dt) {
-    game.onTick(Date.now());
     window.requestAnimationFrame(gameLoop);
+    game.onTick(Date.now());
 }
 
