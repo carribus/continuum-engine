@@ -45,7 +45,7 @@ To create a resource, you call the `engine.createresource(defObj)` method and pa
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |
 | key               | Required      | `string`  | (Inherited from Entity) The identifier for the Resource entity                            |
-| basePrice         | Required      | `Currency`| The price for the resource (expressed in units of a specific currency |
+| basePrice         | *optional*    | `Currency`| The price for the resource (expressed in units of a specific currency |
 | calculated        | *optional*    | `CalcDefObj`| If present, this function is called to calculate the current 'count' value based on other entities |
 | count             | *optional*    | `integer` | (Inherited from Entity) The starting number of resources of this type |
 | maxCount          | *optional*    | `integer` | (Inherited from Entity) Maximum number of resources of this type that are allowed |
