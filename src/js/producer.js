@@ -170,12 +170,13 @@ export default class Producer extends Entity {
                                         const incrementBy = clampedCount * rules.productionAmount;
     
                                         reduceConsumpedInputsBy(clampedCount, rules.inputRequirements);
-                                        obj.incrementBy(incrementBy);
-                                        this.emit("PRODUCER_OUTPUT", {
-                                            producer: this,
-                                            output: obj,
-                                            delta: incrementBy
-                                        });
+                                        if (obj.incrementBy(incrementBy) != 0) {
+                                            this.emit("PRODUCER_OUTPUT", {
+                                                producer: this,
+                                                output: obj,
+                                                delta: incrementBy
+                                            });
+                                        }
                     
                                         rules.lastProcessed = dt;
                                     };

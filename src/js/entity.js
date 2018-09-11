@@ -31,15 +31,22 @@ export default class Entity extends EventEmitter {
 
     incrementBy(val) {
         const origValue = this.state.count;
-        this.state.count += val;
+        let diff = 0;
+        this.state.count = Math.min(this.state.count + val, this.state.maxCount);
         if ( this.state.count < 0 ) this.state.count = 0;
 
-        this.emit(this.state.type.toUpperCase() + "_COUNT_UPDATED", {
-            obj: this,
-            key: this.state.key, 
-            count: this.state.count,
-            delta: this.state.count-origValue
-        });
+        diff = this.state.count - origValue;
+
+        if (diff !== 0) {
+            this.emit(this.state.type.toUpperCase() + "_COUNT_UPDATED", {
+                obj: this,
+                key: this.state.key,
+                count: this.state.count,
+                delta: diff
+            });
+        }
+
+        return diff
     }
 
     requirementsMet() {
