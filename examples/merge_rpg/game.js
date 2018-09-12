@@ -60,7 +60,7 @@ export default class Game {
         const [x, y] = [(e.count - 1) % GAME_CONFIG.grid.width, Math.floor((e.count - 1) / GAME_CONFIG.grid.width)]
         console.log('Weapon created: %s, %s', x, y);
 
-        this.engine.createProducer({
+        const prod = this.engine.createProducer({
             key: `w:${x}:${y}`,
             count: 1,
             maxCount: 1,
@@ -73,12 +73,12 @@ export default class Game {
                 }
             }
         }).on("PRODUCER_OUTPUT", this.onGoldGenerated.bind(this));
-        this.ui.createWeaponSprite(this.weaponNames[this.currentWeaponIndex], x, y);
+        prod.sprite = this.ui.createWeaponSprite(this.weaponNames[this.currentWeaponIndex], x, y);
     }
 
     onGoldGenerated(e) {
-        console.log('Gold generated: ');
-        console.log(e);
+        // console.log('Gold generated: ');
+        // console.log(e);
         let coords = e.producer.key.split(':');
         coords.shift();
 
