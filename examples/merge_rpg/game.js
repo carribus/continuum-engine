@@ -57,6 +57,7 @@ export default class Game {
     }
 
     onWeaponCreated(e) {
+        // TODO: Change this to find the next available cell coords
         const [x, y] = [(e.count - 1) % GAME_CONFIG.grid.width, Math.floor((e.count - 1) / GAME_CONFIG.grid.width)]
         console.log('Weapon created: %s, %s', x, y);
 
@@ -72,8 +73,9 @@ export default class Game {
                     }
                 }
             }
-        }).on("PRODUCER_OUTPUT", this.onGoldGenerated.bind(this));
-        prod.sprite = this.ui.createWeaponSprite(this.weaponNames[this.currentWeaponIndex], x, y);
+        });
+        prod.on("PRODUCER_OUTPUT", this.onGoldGenerated.bind(this));
+        prod.sprite = this.ui.createWeaponSprite(prod, this.weaponNames[this.currentWeaponIndex], x, y);
     }
 
     onGoldGenerated(e) {
@@ -82,7 +84,7 @@ export default class Game {
         let coords = e.producer.key.split(':');
         coords.shift();
 
-        this.ui.createGoldCounter(e.delta, parseInt(coords[0]), parseInt(coords[1]));
+        this.ui.createGoldCounter(e.producer, e.delta, parseInt(coords[0]), parseInt(coords[1]));
     }
 
     calculateGoldForWeapon() {

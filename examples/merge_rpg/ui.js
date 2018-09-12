@@ -1,4 +1,5 @@
 import WeaponAssets from "./weapons.js";
+import WeaponSprite from "./weaponsprite.js";
 
 export default class MergeUI {
     constructor(game, config) {
@@ -56,15 +57,15 @@ export default class MergeUI {
 
     createGrid() {
         const sprite = new PIXI.Container();
-        for (let y = 0; y < this.gridSize.h; y++ ) {
-            for (let x = 0; x < this.gridSize.w; x++ ) {
+        for (let y = 0; y < this.gridSize.h; y++) {
+            for (let x = 0; x < this.gridSize.w; x++) {
                 let o = new PIXI.Graphics();
                 o.beginFill(0x000000);
                 o.alpha = 0.5
                 o.drawRect(0, 0, this.cellSize.w, this.cellSize.h);
                 o.endFill();
-                o.x = x * this.cellSize.w + 20*x;
-                o.y = y * this.cellSize.h + 20*y;
+                o.x = x * this.cellSize.w + 20 * x;
+                o.y = y * this.cellSize.h + 20 * y;
                 sprite.addChild(o);
             }
         }
@@ -77,7 +78,7 @@ export default class MergeUI {
     }
 
     createScoreTextObject() {
-        const sprite = new PIXI.Text(`${this.game.score} G`, new PIXI.TextStyle({
+        const sprite = new PIXI.Text(`G ${this.game.score}`, new PIXI.TextStyle({
             fontfamily: "Arial",
             fontSize: 48,
             fill: "white",
@@ -98,101 +99,68 @@ export default class MergeUI {
         return sprite;
     }
 
-    createWeaponSprite(name, cellX, cellY) {
+    createWeaponSprite(producer, name, cellX, cellY) {
 
-        const getWeaponSprite = (x, y) => {
-            // implement manual hit checking because this pixijs seems to always return null in the .target property of InteractionEvents
-            let bounds, sprite;
-            for (let i = 0; i < this.sprites.cells.length; i++) {
-                sprite = this.sprites.cells[i];
-                if (sprite) {
-                    bounds = sprite.getBounds();
-                    if (x >= bounds.x && x <= bounds.x + bounds.width && y >= bounds.y && y <= bounds.y + bounds.height) {
-                        return sprite;
-                    }
-                }
-            }
-            return null;
+        const getCellAtCoords = (x, y) => {
+            const result = this.sprites.grid.children.find((cell) => {
+                const pos = { x: this.sprites.grid.x + cell.x, y: this.sprites.grid.y + cell.y };
+                return (x >= pos.x && x <= pos.x + cell.width && y >= pos.y && y <= pos.y + cell.height);
+            });
+            return result;
         }
-        const getDestinationCell = (dragSprite) => {
-            let bounds, cellSprite;
-            let dragBounds = dragSprite.getBounds();
 
-            dragBounds.x += dragBounds.width/2;
-            dragBounds.y += dragBounds.height/2;
-            for (let i = 0; i < this.sprites.grid.children.length; i++) {
-                cellSprite = this.sprites.grid.children[i];
-                if (cellSprite) {
-                    bounds = cellSprite.getBounds();
-                    if (dragBounds.x >= bounds.x && dragBounds.x <= bounds.x + bounds.width && dragBounds.y >= bounds.y && dragBounds.y <= bounds.y + bounds.height) {
-                        return this.sprites.cells[i] ? null : cellSprite;
-                    }
-                }
-            }
-            return null;
-        }
         const cellSprite = this.getGridCellSprite(cellX, cellY);
+
         let sprite = this.sprites.cells[cellY * this.gridSize.w + cellX];
         if (sprite) {
             throw "Cannot create weapon sprite in a cell that already has a weapon sprite!";
         }
 
-        sprite = new PIXI.Sprite(PIXI.loader.resources[name].texture);
-        sprite.interactive = true;
-        sprite.x = cellSprite.x;
-        sprite.y = cellSprite.y;
+        sprite = new WeaponSprite(producer, PIXI.loader.resources[name].texture, this.sprites.grid.x + cellSprite.x, this.sprites.grid.y + cellSprite.y);
 
-        sprite.on('mousedown', onDragStart.bind(this));
-        sprite.on('touchstart', onDragStart.bind(this));
-        sprite.on('mouseup', onDragEnd.bind(this));
-        sprite.on('touchend', onDragEnd.bind(this));
-        sprite.on('mousemove', onDragMove.bind(this));
-        sprite.on('touchmove', onDragMove.bind(this));
-
-        function onDragStart(e) {
-            console.log(e);
-            this.dragSprite = getWeaponSprite(e.data.global.x, e.data.global.y);
+        sprite.onDragStart = (e) => {
+            this.dragSprite = e.object;
+            this.dragSprite.oldPos = { x: this.dragSprite.sprite.x, y: this.dragSprite.sprite.y };
+        };
+        sprite.onDragMove = (e) => {
             if (this.dragSprite) {
-                this.dragCellStart = this.sprites.cells.indexOf(this.dragSprite);
-                console.log(`dragCellStart = ${this.dragCellStart}`)
+                const newPos = e.pixievent.data.getLocalPosition(this.dragSprite.sprite.parent);
+                console.log(`moving to ${newPos.x}, ${newPos.y}`);
+                this.dragSprite.sprite.x = newPos.x - this.dragSprite.sprite.width / 2;
+                this.dragSprite.sprite.y = newPos.y - this.dragSprite.sprite.height / 2;
             }
         }
-
-        function onDragMove(e) {
+        sprite.onDragEnd = (e) => {
             if (this.dragSprite) {
-                const newPos = e.data.getLocalPosition(this.dragSprite.parent);
-                this.dragSprite.x = newPos.x - this.dragSprite.width / 2;
-                this.dragSprite.y = newPos.y - this.dragSprite.height / 2;
-            }
-        };
-
-        function onDragEnd(e) {
-            if (this.dragSprite) {
-                const targetCell = getDestinationCell(this.dragSprite);
-                if (targetCell) {
-                    this.dragSprite.x = targetCell.x;
-                    this.dragSprite.y = targetCell.y;
+                const cellSprite = getCellAtCoords(this.dragSprite.sprite.x + this.dragSprite.sprite.width / 2,
+                    this.dragSprite.sprite.y + this.dragSprite.sprite.height / 2);
+                if (cellSprite) {
+                    // TODO: Check if a weapon already exists in this cell
+                    this.dragSprite.sprite.x = this.sprites.grid.x + cellSprite.x;
+                    this.dragSprite.sprite.y = this.sprites.grid.y + cellSprite.y;
                 } else {
-                    // reset the drag sprite to its original cell
-                    const origCell = this.sprites.grid.children[this.dragCellStart];
-                    this.dragSprite.x = origCell.x;
-                    this.dragSprite.y = origCell.y;
+                    this.dragSprite.sprite.x = this.dragSprite.oldPos.x;
+                    this.dragSprite.sprite.y = this.dragSprite.oldPos.y;
                 }
             }
             this.dragSprite = null;
-            this.dragCellStart = null;
         }
 
         this.sprites.cells[cellY * this.gridSize.w + cellX] = sprite;
-        this.sprites.grid.addChild(sprite);
+        this.app.stage.addChild(sprite.sprite);
 
         return sprite;
     }
 
-    createGoldCounter(value, cellX, cellY) {
-        const cellSprite = this.getGridCellSprite(cellX, cellY);
-        const x = this.sprites.grid.x + cellSprite.x + cellSprite.width / 2;
-        const y = this.sprites.grid.y + cellSprite.y;
+    getSpriteForProducer(prod) {
+        return this.sprites.cells.find((e) => e.producer == prod);
+    }
+
+    createGoldCounter(producer, value, cellX, cellY) {
+        const weaponSprite = this.getSpriteForProducer(producer);
+
+        const x = weaponSprite.sprite.x + weaponSprite.sprite.width / 2;
+        const y = weaponSprite.sprite.y;
 
         const counterSprite = new PIXI.Text(`+${this.game.engine.formatNumber(value, 0)}`, new PIXI.TextStyle({
             fontfamily: "Arial",
@@ -233,7 +201,7 @@ export default class MergeUI {
     }
 
     update(dt) {
-        this.sprites.score.text = `${this.game.engine.formatNumber(this.game.score, 0)} G`;
+        this.sprites.score.text = `G ${this.game.engine.formatNumber(this.game.score, 0)}`;
 
         this.sprites.counters = this.sprites.counters.filter((e) => {
             e.y += e.vy;
