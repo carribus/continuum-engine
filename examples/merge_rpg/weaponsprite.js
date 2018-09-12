@@ -1,10 +1,11 @@
 import EventEmitter from "./engine/js/eventemitter.js";
 
 export default class WeaponSprite extends EventEmitter {
-    constructor(producer, texture, x, y) {
+    constructor(producer, level, texture, x, y) {
         super();
         this.producer = producer;
         this.cell = null;
+        this.level = level;
 
         this.sprite = new PIXI.Sprite(texture);
         if (this.sprite) {
@@ -43,7 +44,6 @@ export default class WeaponSprite extends EventEmitter {
     };
 
     onDragEnd(e) {
-        console.log('dragend');
         if (this.onDragEnd) {
             this.onDragEnd({
                 pixievent: e,
