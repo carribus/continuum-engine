@@ -6,7 +6,7 @@ Currently the engine is in very early-stage development, so if you stumble upon 
 
 ## Examples
 
-I always recommend starting with the examples to see how the engine can be used. The examples can be found in the `examples/` folder.
+I recommend starting with the examples to see how the engine can be used. The examples can be found in the `examples/` folder.
 
 ### Running the examples:
 
