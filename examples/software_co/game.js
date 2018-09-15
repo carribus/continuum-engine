@@ -316,16 +316,17 @@ function connectUItoHandlers() {
                         const currencyType = producer.baseCost.currency;
                         const cost = producer.calculateCost(1);
     
-                        if (engine.currencies[currencyType].value - cost >= 0) {
-                            engine.currencies[currencyType].incrementBy(-cost);
+                        if (engine.currencies[currencyType].value - cost.price >= 0) {
+                            engine.currencies[currencyType].incrementBy(-cost.price);
                             producer.incrementBy(1);
-                            e.target.innerHTML = `Buy 1 for ${engine.formatNumber(producer.calculateCost(1))} ${producer.baseCost.currency}`;
+                            e.target.innerHTML = `Buy 1 for ${engine.formatNumber(cost.price)} ${cost.currency}`;
                         }
                     }
                 } 
             });
             if ( engine.producers[key] ) {
-                buttons[key]["Buy1"].innerHTML = `Buy 1 @ ${engine.formatNumber(engine.producers[key].calculateCost(1))} ${engine.producers[key].baseCost.currency}`;
+                const cost = engine.producers[key].calculateCost(1);
+                buttons[key]["Buy1"].innerHTML = `Buy 1 @ ${engine.formatNumber(cost.price)} ${cost.currency}`;
             }
         }
         if (buttons[key]["SellAll"]) {

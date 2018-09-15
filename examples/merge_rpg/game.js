@@ -4,10 +4,10 @@ import Weapons from "./weapons.js";
 
 const GAME_CONFIG = {
     grid: {
-        width: 4,
-        height: 4,
-        cellWidth: 225,
-        cellHeight: 225
+        width: 5,
+        height: 5,
+        cellWidth: 164,
+        cellHeight: 164
     }
 }
 

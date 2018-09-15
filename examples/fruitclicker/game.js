@@ -70,9 +70,9 @@ export default class Game {
 
     purchaseAutoClicker() {
         const cost = this.producer.calculateCost(1);
-        if (this.engine.currency("Juice").value - cost >= 0) {
+        if (this.engine.currency("Juice").value - cost.price >= 0) {
             this.producer.incrementBy(1);
-            this.engine.currencies["Juice"].incrementBy(-cost);
+            this.engine.currencies["Juice"].incrementBy(-cost.price);
             this.producer.processingEnabled = true;
         }
     }

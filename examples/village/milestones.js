@@ -2,7 +2,7 @@ const eventHandlers = [
     {
         event: "PRODUCER_COUNT_UPDATED",
         handler: function(e) {
-            const milestones = [10, 25, 50, 100, 200, 500, 1000, 2500, 5000, 10000]
+            const milestones = [5, 10, 25, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000, 2500, 5000, 10000]
             const timeReductionFactor = 0.8;
             const resourceValueIncreaseFactor = 2;
 

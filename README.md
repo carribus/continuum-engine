@@ -177,7 +177,7 @@ The `InputRequirement` object defines the required amount of *input* entity that
 
 
 ### InputMap
-The `InputMap` object must contain *at least* one output category (for example, `resources` or `producers`).
+The `InputMap` object must contain *at least* one entity category (for example, `resources` or `producers`).
 
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |
@@ -196,7 +196,7 @@ The `InputRule` object defines the rules for a producer's input consumption of a
 
 
 ### RequirementMap
-The `RequirementMap` object must contain *at least* one output category (for example, `resources` or `producers`).
+The `RequirementMap` object must contain *at least* one entity category (for example, `resources` or `producers`).
 
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |

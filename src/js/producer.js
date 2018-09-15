@@ -52,11 +52,12 @@ export default class Producer extends Entity {
 
     // TODO: Modify this method to return the cost as a currency object instead of just a unqualified value
     calculateCost(count) {
-        let cost = 0;
+        let cost = null;
 
         if (this.state.baseCost) {
+            cost = { currency: this.state.baseCost.currency, price: 0 };
             for (let i = 0; i < count; i++) {
-                cost += Math.round(this.state.baseCost.amount * Math.pow(this.state.costCoefficient, this.state.count + i));
+                cost.price += Math.round(this.state.baseCost.amount * Math.pow(this.state.costCoefficient, this.state.count + i));
             }
         }
         return cost;

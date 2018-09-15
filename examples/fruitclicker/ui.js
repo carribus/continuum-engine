@@ -134,7 +134,7 @@ export default class GameUI {
 
         // setup the auto-clicker buy button
         const createBuyAutoClickerButton = () => {
-            const sprite = new PIXI.Text(`Buy 1 AutoClicker\nCost: ${this.game.producer.calculateCost(1)} Juice`, new PIXI.TextStyle({
+            const sprite = new PIXI.Text(`Buy 1 AutoClicker\nCost: ${this.game.producer.calculateCost(1).price} Juice`, new PIXI.TextStyle({
                 fontfamily: "Arial",
                 fontSize: 32,
                 align: "left",
@@ -246,12 +246,12 @@ export default class GameUI {
 
     onBuyPressed(e) {
         this.game.purchaseAutoClicker();
-        this.sprites.buy.text = `Buy 1 AutoClicker\nCost: ${this.game.producer.calculateCost(1)} Juice`;
+        this.sprites.buy.text = `Buy 1 AutoClicker\nCost: ${this.game.engine.formatNumber(this.game.producer.calculateCost(1).price)} Juice`;
     }
 
     onBuyTapPowerPressed(e) {
         this.game.purchaseTapPower();
-        this.sprites.buyTapPower.text = `Increase Tap Power\nCost: ${this.game.calculateTapPowerCost(1)} Juice`;
+        this.sprites.buyTapPower.text = `Increase Tap Power\nCost: ${this.game.engine.formatNumber(this.game.calculateTapPowerCost(1))} Juice`;
     }
 
     onTick(dt) {
