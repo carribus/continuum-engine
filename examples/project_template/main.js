@@ -1,6 +1,6 @@
 import Game from "./game.js"
 
-const game;
+let game;
 
 window.onload = function () {
     game = new Game();
