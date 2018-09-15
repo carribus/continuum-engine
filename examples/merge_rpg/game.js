@@ -58,29 +58,34 @@ export default class Game {
 
     onWeaponCreated(e) {
         if (e.delta > 0) {
-            // TODO: Change this to find the next available cell coords
-            const cell = this.ui.findFirstEmptyCell();
-            console.log('Weapon created:');
+            for ( let i = 0; i < e.delta; i++ ) {
+                const cell = this.ui.findFirstEmptyCell();
 
-            if (cell !== -1) {
-                const prod = this.engine.createProducer({
-                    key: `w:${Date.now()}`,
-                    count: 1,
-                    maxCount: 1,
-                    outputs: {
-                        currencies: {
-                            "gold": {
-                                productionTime: 1000,
-                                productionAmount: this.calculateGoldForWeapon(this.currentWeaponIndex)
+                if (cell !== -1) {
+                    const prod = this.engine.createProducer({
+                        key: `w:${Date.now()}`,
+                        count: 1,
+                        maxCount: 1,
+                        outputs: {
+                            currencies: {
+                                "gold": {
+                                    productionTime: 1000,
+                                    productionAmount: this.calculateGoldForWeapon(this.currentWeaponIndex)
+                                }
                             }
                         }
-                    }
-                });
-                prod.on("PRODUCER_OUTPUT", this.onGoldGenerated.bind(this));
-                // prod.sprite = this.ui.createWeaponSprite(prod, this.currentWeaponIndex, this.weaponNames[this.currentWeaponIndex], cell % GAME_CONFIG.grid.width, Math.floor(cell / GAME_CONFIG.grid.width));
-                prod.sprite = this.ui.createWeaponSprite(prod, this.currentWeaponIndex, cell % GAME_CONFIG.grid.width, Math.floor(cell / GAME_CONFIG.grid.width));
+                    });
+                    prod.on("PRODUCER_OUTPUT", this.onGoldGenerated.bind(this));
+                    // prod.sprite = this.ui.createWeaponSprite(prod, this.currentWeaponIndex, this.weaponNames[this.currentWeaponIndex], cell % GAME_CONFIG.grid.width, Math.floor(cell / GAME_CONFIG.grid.width));
+                    prod.sprite = this.ui.createWeaponSprite(prod, this.currentWeaponIndex, cell % GAME_CONFIG.grid.width, Math.floor(cell / GAME_CONFIG.grid.width));
+                } else {
+                    // no more empty spaces, we can hop out
+                    break;
+                }
             }
         }
+        console.log(`Weapon created: ${this.engine.resource('weapon').count} weapons`);
+
     }
 
     onGoldGenerated(e) {
@@ -98,6 +103,7 @@ export default class Game {
             into.producer.outputs.currencies.gold.productionAmount = this.calculateGoldForWeapon(into.level);
             this.engine.destroyProducer(from.producer.key);
             this.engine.resource('weapon').incrementBy(-1);
+            console.log(`Weapon merged: ${this.engine.resource('weapon').count}`);
         }
     }
 
