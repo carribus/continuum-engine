@@ -15,7 +15,6 @@ const NUMBER_FORMATTERS = {
 
 export default class ContinuumEngine {
     constructor() {
-        console.log("Continuum Engine constructing");
         this.lastTick = 0;
         this.lastSave = 0;
         this.currencies = {};
@@ -26,6 +25,7 @@ export default class ContinuumEngine {
         this.activeModifiers = [];
         this.numberFormatter = formatDictionaryNumber;
         this.autosavePeriod = 0;
+        console.log("%c %c Continuum Engine ready", "font-size: 12px;background: blue; color: white", "font-size: 12px; background: white; color: black;");
     }
 
     createCurrency(type, initialValue) {
