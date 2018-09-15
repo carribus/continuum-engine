@@ -43,8 +43,8 @@ export default class VillageUI {
             }
 
             const cost = producer.calculateCost(1);
-            prod.buy.innerHTML = `Buy x 1 - G ${this.engine.formatNumber(cost)}`;
-            prod.buy.disabled = this.engine.currencies.gold.value - cost < 0;
+            prod.buy.innerHTML = `Buy x 1 - G ${this.engine.formatNumber(cost.price)}`;
+            prod.buy.disabled = this.engine.currencies.gold.value - cost.price < 0;
         }
 
         for (const key in this.managerElems) {
@@ -63,9 +63,9 @@ export default class VillageUI {
         const onBuyButtonPressed = (e) => {
             const producer = e.target.producerObj;
             const cost = producer.calculateCost(1);
-            if (this.engine.currencies.gold.value - cost >= 0) {
+            if (this.engine.currencies.gold.value - cost.price >= 0) {
                 producer.incrementBy(1);
-                this.engine.currencies.gold.incrementBy(-cost);
+                this.engine.currencies.gold.incrementBy(-cost.price);
             }
             e.preventDefault();
         };
@@ -108,7 +108,7 @@ export default class VillageUI {
 
             let pButton = document.createElement("button");
             pButton.className = "button";
-            pButton.innerHTML = `Buy x 1 - G ${this.engine.formatNumber(this.engine.producers[key].calculateCost(1))}`;
+            pButton.innerHTML = `Buy x 1 - G ${this.engine.formatNumber(this.engine.producers[key].calculateCost(1).price)}`;
             pButton.producerObj = this.engine.producers[key];
             pButton.addEventListener("touchstart", onBuyButtonPressed);
             pButton.addEventListener("click", onBuyButtonPressed);

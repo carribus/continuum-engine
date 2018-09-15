@@ -45,7 +45,7 @@ To create a resource, you call the `engine.createresource(defObj)` method and pa
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |
 | key               | Required      | `string`  | (Inherited from Entity) The identifier for the Resource entity                            |
-| basePrice         | Required      | `Currency`| The price for the resource (expressed in units of a specific currency |
+| basePrice         | *optional*    | `Currency`| The price for the resource (expressed in units of a specific currency |
 | calculated        | *optional*    | `CalcDefObj`| If present, this function is called to calculate the current 'count' value based on other entities |
 | count             | *optional*    | `integer` | (Inherited from Entity) The starting number of resources of this type |
 | maxCount          | *optional*    | `integer` | (Inherited from Entity) Maximum number of resources of this type that are allowed |
@@ -177,7 +177,7 @@ The `InputRequirement` object defines the required amount of *input* entity that
 
 
 ### InputMap
-The `InputMap` object must contain *at least* one output category (for example, `resources` or `producers`).
+The `InputMap` object must contain *at least* one entity category (for example, `resources` or `producers`).
 
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |
@@ -196,7 +196,7 @@ The `InputRule` object defines the rules for a producer's input consumption of a
 
 
 ### RequirementMap
-The `RequirementMap` object must contain *at least* one output category (for example, `resources` or `producers`).
+The `RequirementMap` object must contain *at least* one entity category (for example, `resources` or `producers`).
 
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |
