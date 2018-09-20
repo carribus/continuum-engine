@@ -50,7 +50,19 @@ export default class Producer extends Entity {
         }
     }
 
-    // TODO: Modify this method to return the cost as a currency object instead of just a unqualified value
+    resetTimers() {
+        for (const type in this.inputs) {
+            for (const key in this.inputs[type]) {
+                delete this.inputs[type][key].lastProcessed;
+            }
+        }
+        for (const type in this.outputs) {
+            for (const key in this.outputs[type]) {
+                delete this.outputs[type][key].lastProcessed;
+            }
+        }
+    }
+
     calculateCost(count) {
         let cost = null;
 
