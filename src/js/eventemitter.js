@@ -11,6 +11,12 @@ export default class EventEmitter {
         return () => this.removeListener(event, listener);
     }
 
+    off(event) {
+        if (typeof this.events[event] === 'object') {
+            this.events[event] = [];
+        }
+    }
+
     removeListener(event, listener) {
         if (typeof this.events[event] === 'object') {
             const idx = this.events[event].indexOf(listener);
