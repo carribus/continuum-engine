@@ -8,10 +8,28 @@ Currently the engine is in very early-stage development, so if you stumble upon 
 
 I recommend starting with the examples to see how the engine can be used. The examples can be found in the `examples/` folder.
 
-### Running the examples:
+### Running the examples (locally):
 
 1. You need a web-server. I suggest installed [http-server](https://www.npmjs.com/package/http-server)
 2. Once you have the server, simply type: `http-server .` (don't forget the trailing .)
+
+### Running the examples online:
+
+[Idle-RPG: The Quest for more Quests](https://carribus.github.io/continuum-engine/examples/idle_rpg/index.html)
+
+This example demonstrates how to use producers to drive event-based games like a hero running around a world killing monsters and levelling up.
+
+[Fruit Clicker](https://carribus.github.io/continuum-engine/examples/fruitclicker/index.html)
+
+A basic clicker implementation. Demonstrate how to generate resources from user interaction and also create 'auto-clickers'
+
+[Merge RPG](https://carribus.github.io/continuum-engine/examples/merge_rpg/index.html)
+
+A small example of how to build an Idle Merge game.
+
+[Village Life](https://carribus.github.io/continuum-engine/examples/village/index.html)
+
+A very very basic example of how to build a basic resource generation game like AdCap. Remember... this is a very basic example :)
 
 ## How Continuum Engine works
 
