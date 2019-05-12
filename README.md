@@ -110,6 +110,21 @@ engine.createResource({
 })
 ```
 
+### Resource Events
+
+The following events are emitted by Resource objects and can be subscribed to using the base EventEmitter class' ```on``` method:
+
+#### RESOURCE_COUNT_UPDATED
+This event is emitted when the ```count``` of a specific resource changes.
+```javascript
+{
+    obj: Resource, // Event source (resource)
+    key: string, // Entity key
+    count: Number, // The current count of the resource,
+    delta: Number //The difference from the previous count
+}
+```
+
 ## Producer definition
 
 To create a producer, you call the `engine.createProducer(defObj)` method and pass in an object which contains one or more of the following properties:
@@ -240,6 +255,31 @@ The 'RequirementRuleMap' object defines the minimum requirements that must be me
 | Property          | Required?     | Type      | Description                                                       |
 | -----------       | -----------   | ------    | ----------------------------------------------------------------  |
 | {EntityKey}       | Required      | `Number`  | A value the defines the minimum number of this type of Entity that must exist |
+
+### Producer Events
+
+The following events are emitted by Producer objects and can be subscribed to using the base EventEmitter class' ```on``` method:
+
+#### PRODUCER_COUNT_UPDATED
+This event is emitted when the ```count``` of a specific resource changes.
+```javascript
+{
+    obj: Producer, // Event source (producer)
+    key: string, // Entity key
+    count: Number, // The current count of the producer,
+    delta: Number //The difference from the previous count
+}
+```
+
+#### PRODUCER_OUTPUT
+This event is emitted by a producer when it produces another entity. It is emitted _after_ the ```count``` property of the produced entity is increased
+```javascript
+{
+    producer: Producer, // Event source
+    output: Entity, // The target entity that was produced
+    delta: Number // The amount of target entity that was produced
+}
+```
 
 ### Putting it all together
 
