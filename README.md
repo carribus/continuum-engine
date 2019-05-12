@@ -2,7 +2,7 @@
 
 The Continuum Engine is a game engine built in Javascript to help power the creation of games in the [incremental, idle and clicker genre](https://en.wikipedia.org/wiki/Incremental_game).
 
-Currently the engine is in very early-stage development, so if you stumble upon this repo, you should probably move along since there's not much to talk about here yet :)
+Currently the engine is still in development, so you may find some bugs or improvements that should be made - just raise an issue :)
 
 ## Examples
 
